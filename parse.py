@@ -15,6 +15,7 @@ report_doc = pd.read_excel(report_path, engine="odf", header=3, index_col=0)
 class Classroom():
     def __init__(self) -> None:
         self._students = {}
+        self.weights = []
         for index, name in report_doc["Nome"].items():
             self._students[index] = Student(name=name, index=index)
 
@@ -32,6 +33,8 @@ class Student():
         self.predicted_score = 0.0
 
         self.progression = []
+        self.interpolated_progression = []
+        self.interpolated_progression_bool = []
     
 
 def initialize_student_dict():
@@ -105,7 +108,39 @@ def interpolate_score(student: Student):
     xnew = [i for i in range(len(student.reports.keys())) if i <= x[-1]]
     ynew = f(xnew)
 
+    student.interpolated_progression = ynew
     return sum(ynew)
+
+def classify_dropout(student: Student):
+    """
+    """
+    count_drops = 0
+    for datapoint in student.interpolated_progression_bool:
+        if not datapoint:
+            count_drops += 1
+        else:
+            count_drops = 0
+        if count_drops == 3:
+            student.drop_out = True
+            break
+
+
+
+
+def measure_weights(classroom: Classroom):
+    """Calcula os pesos de cada falta baseado na turma inteira
+    """
+    weight_array = []
+    for index_date in range(len(classroom._students[1].interpolated_progression)):
+        weight_date = []
+        for index, student in classroom._students.items():
+            weight_date += [student.interpolated_progression[index_date]]
+        weight_array += [weight_date]
+    weight_array = np.array(weight_array)
+    weight_array_new = []
+    for date in weight_array:
+        weight_array_new += [np.mean(date)]
+    return np.array(weight_array_new)
 
 
 classroom = Classroom()
@@ -115,11 +150,19 @@ for index, _ in enumerate(classroom._students):
     compute_score(student=student)
     student.predicted_score = interpolate_score(student=student)
     student.percentage = student.predicted_score / student.max_score * 100
-    print(student.name, student.predicted_score, student.max_score)
-    if student.percentage >= 75:
-        print("Enough frequency!")
-    else:
-        print("FI")
+    # print(student.name, student.predicted_score, student.max_score)
+    # if student.percentage >= 75:
+    #     print("Enough frequency!")
+    # else:
+    #     print("FI")
+
+classroom.weights = measure_weights(classroom=classroom)
+for _, student in classroom._students.items():
+    for index, datapoint in enumerate(student.interpolated_progression):
+        if datapoint < classroom.weights[index]:
+            student.interpolated_progression_bool += [False]
+        else:
+            student.interpolated_progression_bool += [True]
 
     
 
