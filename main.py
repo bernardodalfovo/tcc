@@ -10,6 +10,58 @@ from unidecode import unidecode
 from classroom_header import Classroom
 from student_header import Student
 
+def plot(student: Student):
+    """Plot attendences.
+    """
+    plt.title(f"{student.name}")
+
+    attendence = [i['score'] for _, i in student.attendence_report.items()]
+    valids = [i['valid'] for _, i in student.attendence_report.items()]
+    mean_score = [i['mean_score'] for _, i in student.attendence_report.items()]
+
+    total_x = np.array(range(len(mean_score))) + 1
+
+    invalid_x = []
+    invalid_datapoints = []
+    interpolated_datapoints = []
+
+    valid_x = []
+    valid_datapoints = []
+
+    if not all(valids) and None not in student.progression:
+        interpolated = True
+    else:
+        interpolated = False
+
+    for index, data in enumerate(attendence):
+        if valids[index]:
+            valid_datapoints += [data]
+            valid_x += [index+1]
+        else:
+            if interpolated:
+                interpolated_datapoints += [student.progression[index]]
+            invalid_datapoints += [data]
+            invalid_x += [index+1]
+            mean_score[index] = student.overall_mean_attendence_score
+    
+    plt.plot(valid_x, valid_datapoints, 'bo', markersize=10)
+    if len(interpolated_datapoints) > 0:
+        plt.plot(invalid_x, interpolated_datapoints, 'mo', markersize=10, alpha=0.5)
+    else:
+        plt.plot(invalid_x, invalid_datapoints, 'ro', markersize=15)
+    plt.gca().set_xticks(total_x)
+    plt.plot(total_x, mean_score, 'c-', alpha=0.5)
+    plt.grid(which='both')
+    plt.grid(which='minor', alpha=0.2)
+    plt.grid(which='major', alpha=0.5)
+    # plt.legend()
+    plt.ylabel(ylabel="Pontuação")
+    plt.xlim([0,plt.gca().get_xlim()[1]])
+    plt.ylim([-0.1,2.1])
+    plt.xlabel(xlabel="Aula")
+    plt.show()
+
+
 def initialize_student_dict(student_dict: dict, classroom: Classroom):
     """Initialize students' dictionary.
 
@@ -62,7 +114,6 @@ def parse_columns_attendence(classroom: Classroom):
 def parse_columns_grades(classroom: Classroom):
     """
     """
-    # Nome;Sobrenome;Endere�o de email;Curso;Nome do Curso;Matr�cula;
     grade_columns = []
     non_grade_column = [
         "total",
@@ -195,7 +246,7 @@ if __name__ == "__main__":
 
         # student.classify_dropout()
 
-        scores += [student.compute_general_score()]
+        scores += [student.compute_general_score(interpolate_attendence=False)]
     
     quartiles = np.quantile(scores, [0, 0.25, 0.5, 0.75, 1])
 
@@ -207,6 +258,8 @@ if __name__ == "__main__":
 
 
     for _, student in classroom.students.items():
+        # plot(student=student)
+
         if quartiles[3] <= student.general_score <= quartiles[4]:
             safe += [(student.name, student.general_score)]
         elif quartiles[2] <= student.general_score < quartiles[3]:
@@ -223,35 +276,9 @@ if __name__ == "__main__":
         "danger": danger,
     }
 
+    print()
     for category in dropout_chart.keys():
         print(category)
         for student in dropout_chart[category]:
             print(student)
-
-
-
-        # if student.dropout and student.dropout_truth:
-        #     true_positive += 1
-        # elif student.dropout and not student.dropout_truth:
-        #     false_positive += 1
-        # elif not student.dropout and student.dropout_truth:
-        #     false_negative += 1
-            # plt.title(f"{student.name} / Reprovado: {student.dropout} / Reprovado Truth: {student.dropout_truth}")
-            # plt.plot(range(len(student.chosen_progression)), student.chosen_progression, "ro")
-            # plt.plot(range(len(classroom.attendence_weights)), classroom.attendence_weights, "-c", alpha=0.5)
-            # plt.show()
-        # elif not student.dropout and not student.dropout_truth:
-        #     true_negative += 1
-    
-        # plt.title(f"{student.name} / Reprovado: {student.dropout} / Reprovado Truth: {student.dropout_truth}")
-        # plt.plot(range(len(student.chosen_progression)), student.chosen_progression, "ro")
-        # plt.plot(range(len(classroom.attendence_weights)), classroom.attendence_weights, "-c", alpha=0.5)
-        # plt.show()
-
-#     print(f"""
-# \t\t\t\t\tTRUTH
-# \t\t\t\tTRUE\t|       FALSE
-# ---------------------------------------------------------------
-#     TRUE\t\tTP:\t{true_positive}\t|\tFP:\t{false_positive}
-#     FALSE\t\tFN:\t{false_negative}\t|\tTN:\t{true_negative}
-#     """)
+    print()
