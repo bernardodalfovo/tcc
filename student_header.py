@@ -9,6 +9,9 @@ class Student():
         self.name = name
         self.percentage = 0.0
 
+        self.progression = []
+        self.weighted_progression = []
+
         self.attendence_report = {}
         self.grade_report = {}
         self.activity_report = {}
@@ -18,14 +21,16 @@ class Student():
         self.attendence_score = 0.0
         self.overall_mean_attendence_score = 0.0
 
-    def compute_general_score(self):
+    def compute_general_score(self, interpolate_attendence: bool):
         """Calcula a pontuacao geral do aluno no ranking.
 
         Leva em consideracao presenca (1/3), notas (1/3) e realizacao de atividades (1/3).
         """
         grade_score = self.compute_grade_score()
         completion_score = self.compute_activity_completion_score()
-        attendence_score = self.compute_attendence_score(interpolate=False)
+        attendence_score = self.compute_attendence_score(interpolate=interpolate_attendence)
+
+        # print(f"{self.name}, Grade: {round(grade_score, 2)}, Important activities: {round(completion_score, 2)}, Attendence: {round(attendence_score, 2)}")
 
         general_score = (
             (grade_score / 3)
@@ -100,16 +105,23 @@ class Student():
             else:
                 progression += [None]
                 date_weights += [self.overall_mean_attendence_score / report[date]["max_score"]]
-            
+        if progression[0] is None and interpolate:
+                # get mean score if very first datapoint is not valid
+                # so that interpolation goes from the first datapoint
+                progression[0] = np.mean([i for i in progression if i is not None])
+                date_weights[0] = self.overall_mean_attendence_score / report[date]["max_score"]
         if interpolate:
             progression = self.interpolate_progression(progression=progression)
-        
-        weighted_anti_progression = []
 
+        self.progression = progression
+
+        weighted_anti_progression = []
         for index, data in enumerate(progression):
             if data is not None:
-                weighted_anti_progression += [(max_score[index] - (data * date_weights[index]))]
+                weighted_anti_progression += [(data * date_weights[index]) if data < max_score[index] else max_score[index]]
         
+        self.weighted_progression = weighted_anti_progression
+
         attendence_score = np.sum(weighted_anti_progression) / np.sum(max_score if interpolate else max_valid_score) * 100
 
         return attendence_score
@@ -117,13 +129,14 @@ class Student():
     def interpolate_progression(self, progression: list):
         """Interpola pontuacao para dias invalidos.
         """
+        x = []
+        y = []
         for index, datapoint in enumerate(progression):
             if datapoint is not None:
                 x += [index]
                 y += [datapoint]
                 # x += [datapoint[0]]     # datetime
                 # y += [datapoint[1]]     # score
-
         f = interp1d(x,y)
 
         xnew = [i for i in range(len(self.attendence_report))]
@@ -140,6 +153,6 @@ class Student():
                 count_drops += 1
             else:
                 count_drops = 0
-            if count_drops == 3: #mudei de 5 para 3 e ficou melhor, 4 tem alguns falsos negativos ainda
+            if count_drops == 3:
                 self.dropout = True
                 break
