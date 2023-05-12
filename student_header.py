@@ -12,30 +12,30 @@ class Student():
         self.progression = []
         self.weighted_progression = []
 
-        self.attendence_report = {}
+        self.attendance_report = {}
         self.grade_report = {}
         self.activity_report = {}
 
         self.general_score = 0.0
         self.activity_score = 0.0
-        self.attendence_score = 0.0
-        self.overall_mean_attendence_score = 0.0
+        self.attendance_score = 0.0
+        self.overall_mean_attendance_score = 0.0
 
-    def compute_general_score(self, interpolate_attendence: bool):
+    def compute_general_score(self, interpolate_attendance: bool):
         """Calcula a pontuacao geral do aluno no ranking.
 
         Leva em consideracao presenca (1/3), notas (1/3) e realizacao de atividades (1/3).
         """
         grade_score = self.compute_grade_score()
         completion_score = self.compute_activity_completion_score()
-        attendence_score = self.compute_attendence_score(interpolate=interpolate_attendence)
+        attendance_score = self.compute_attendance_score(interpolate=interpolate_attendance)
 
-        # print(f"{self.name}, Grade: {round(grade_score, 2)}, Important activities: {round(completion_score, 2)}, Attendence: {round(attendence_score, 2)}")
+        # print(f"{self.name}, Grade: {round(grade_score, 2)}, Important activities: {round(completion_score, 2)}, attendance: {round(attendance_score, 2)}")
 
         general_score = (
             (grade_score / 3)
             + (completion_score / 3)
-            + (attendence_score / 3)
+            + (attendance_score / 3)
         )
         self.general_score = general_score
         return general_score
@@ -78,10 +78,10 @@ class Student():
         return (max_score - activity_anti_score) / max_score * 100
 
     
-    def compute_attendence_score(self, interpolate: bool):
-        """Compute student's attendence score.
+    def compute_attendance_score(self, interpolate: bool):
+        """Compute student's attendance score.
         """
-        report = self.attendence_report
+        report = self.attendance_report
         max_score = []
         max_valid_score = []
         date_weights = []
@@ -101,15 +101,15 @@ class Student():
                 for i, data in enumerate(progression[::-1]):
                     if data is not None:
                         progression += [data]
-                        date_weights += [self.overall_mean_attendence_score / report[date]["max_score"]]
+                        date_weights += [self.overall_mean_attendance_score / report[date]["max_score"]]
             else:
                 progression += [None]
-                date_weights += [self.overall_mean_attendence_score / report[date]["max_score"]]
+                date_weights += [self.overall_mean_attendance_score / report[date]["max_score"]]
         if progression[0] is None and interpolate:
                 # get mean score if very first datapoint is not valid
                 # so that interpolation goes from the first datapoint
                 progression[0] = np.mean([i for i in progression if i is not None])
-                date_weights[0] = self.overall_mean_attendence_score / report[date]["max_score"]
+                date_weights[0] = self.overall_mean_attendance_score / report[date]["max_score"]
         if interpolate:
             progression = self.interpolate_progression(progression=progression)
 
@@ -122,9 +122,9 @@ class Student():
         
         self.weighted_progression = weighted_anti_progression
 
-        attendence_score = np.sum(weighted_anti_progression) / np.sum(max_score if interpolate else max_valid_score) * 100
+        attendance_score = np.sum(weighted_anti_progression) / np.sum(max_score if interpolate else max_valid_score) * 100
 
-        return attendence_score
+        return attendance_score
     
     def interpolate_progression(self, progression: list):
         """Interpola pontuacao para dias invalidos.
@@ -139,7 +139,7 @@ class Student():
                 # y += [datapoint[1]]     # score
         f = interp1d(x,y)
 
-        xnew = [i for i in range(len(self.attendence_report))]
+        xnew = [i for i in range(len(self.attendance_report))]
         ynew = f(xnew)
 
         return ynew

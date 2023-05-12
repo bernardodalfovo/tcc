@@ -11,13 +11,13 @@ from classroom_header import Classroom
 from student_header import Student
 
 def plot(student: Student):
-    """Plot attendences.
+    """Plot attendances.
     """
     plt.title(f"{student.name}")
 
-    attendence = [i['score'] for _, i in student.attendence_report.items()]
-    valids = [i['valid'] for _, i in student.attendence_report.items()]
-    mean_score = [i['mean_score'] for _, i in student.attendence_report.items()]
+    attendance = [i['score'] for _, i in student.attendance_report.items()]
+    valids = [i['valid'] for _, i in student.attendance_report.items()]
+    mean_score = [i['mean_score'] for _, i in student.attendance_report.items()]
 
     total_x = np.array(range(len(mean_score))) + 1
 
@@ -33,7 +33,7 @@ def plot(student: Student):
     else:
         interpolated = False
 
-    for index, data in enumerate(attendence):
+    for index, data in enumerate(attendance):
         if valids[index]:
             valid_datapoints += [data]
             valid_x += [index+1]
@@ -42,7 +42,7 @@ def plot(student: Student):
                 interpolated_datapoints += [student.progression[index]]
             invalid_datapoints += [data]
             invalid_x += [index+1]
-            mean_score[index] = student.overall_mean_attendence_score
+            mean_score[index] = student.overall_mean_attendance_score
     
     plt.plot(valid_x, valid_datapoints, 'bo', markersize=10)
     if len(interpolated_datapoints) > 0:
@@ -69,27 +69,27 @@ def initialize_student_dict(student_dict: dict, classroom: Classroom):
     """
     student_dict = {}
 
-    for name in classroom.attendence_report["Nome"]:
+    for name in classroom.attendance_report["Nome"]:
         student_dict[name] = Student(name=name)
     
     return student_dict
 
-def parse_columns_attendence(classroom: Classroom):
+def parse_columns_attendance(classroom: Classroom):
     """
     """
-    attendence_columns = []
-    for column in classroom.attendence_report.columns:
+    attendance_columns = []
+    for column in classroom.attendance_report.columns:
         if bool(re.search(r"\d{1,2}\/\d{1,2}\/\d{4}", column)):
-            attendence_columns += [column]
+            attendance_columns += [column]
     overall_score = []
-    for column in attendence_columns:
+    for column in attendance_columns:
         class_score = []
         date_string = re.search(r"\d{1,2}\/\d{1,2}\/\d{4}", column).group()
         valid = True
-        if (classroom.attendence_report[column] == list(classroom.attendence_report[column])[0]).all():
+        if (classroom.attendance_report[column] == list(classroom.attendance_report[column])[0]).all():
             # considerar "?" invalido?
             valid = False
-        for index, report in classroom.attendence_report[column].items():
+        for index, report in classroom.attendance_report[column].items():
             score_report = re.search(r"\((\d+)/(\d+)\)", report)
             if score_report is not None:
                 score = score_report.group(1)
@@ -97,19 +97,19 @@ def parse_columns_attendence(classroom: Classroom):
                 overall_score += [float(score)]
                 max_score = score_report.group(2)
 
-                classroom.students[index].attendence_report[date_string] = {
+                classroom.students[index].attendance_report[date_string] = {
                     "max_score": float(max_score),
                     "score": float(score),
                     "valid": valid,
                 }
-        for index, report in classroom.attendence_report[column].items():
+        for index, report in classroom.attendance_report[column].items():
             score_report = re.search(r"\((\d+)/(\d+)\)", report)
             if score_report is not None:
-                classroom.students[index].attendence_report[date_string].update({
+                classroom.students[index].attendance_report[date_string].update({
                     "mean_score": np.mean(class_score),
                 })
     for student in classroom.students.keys():
-        classroom.students[student].overall_mean_attendence_score = np.mean(overall_score)
+        classroom.students[student].overall_mean_attendance_score = np.mean(overall_score)
 
 def parse_columns_grades(classroom: Classroom):
     """
@@ -199,27 +199,28 @@ def parse_columns_activities(classroom: Classroom):
             })
 
 if __name__ == "__main__":
-    attendence_report_path = "./tarefas/presenca.csv"
+    
+    attendance_report_path = "./tarefas/presenca.csv"
     grade_report_path = "./tarefas/notas.csv"
     activity_report_path = "./tarefas/importantes.csv"
             
-    attendence_report_doc = pd.read_csv(attendence_report_path, header=3, index_col=0, encoding='latin-1', delimiter=';')
+    attendance_report_doc = pd.read_csv(attendance_report_path, header=3, index_col=0, encoding='latin-1', delimiter=';')
     grade_report_doc = pd.read_csv(grade_report_path, header=0, index_col=0, encoding='latin-1', delimiter=';')
     activity_report_doc = pd.read_csv(activity_report_path, header=0, index_col=0, encoding='latin-1', delimiter=';')
 
     classroom = Classroom(
-        attendence_report_doc=attendence_report_doc,
+        attendance_report_doc=attendance_report_doc,
         grade_report_doc=grade_report_doc,
         activity_report_doc=activity_report_doc,
     )
 
-    parse_columns_attendence(classroom=classroom)
+    parse_columns_attendance(classroom=classroom)
     parse_columns_activities(classroom=classroom)
     parse_columns_grades(classroom=classroom)
 
-    # classroom.compute_mean_attendence_score()
+    # classroom.compute_mean_attendance_score()
 
-    # classroom.measure_weights_attendence()
+    # classroom.measure_weights_attendance()
     # classroom.measure_weights_atividades()
     # classroom.measure_weights_notas()
 
@@ -237,7 +238,7 @@ if __name__ == "__main__":
         # student.boolify_progression()
         # for index, datapoint in enumerate(student.chosen_progression):
         #     if (
-        #         datapoint < classroom.attendence_weights[index]
+        #         datapoint < classroom.attendance_weights[index]
         #         or datapoint is None
         #     ):
         #         student.chosen_progression_bool += [False]
@@ -246,7 +247,7 @@ if __name__ == "__main__":
 
         # student.classify_dropout()
 
-        scores += [student.compute_general_score(interpolate_attendence=False)]
+        scores += [student.compute_general_score(interpolate_attendance=False)]
     
     quartiles = np.quantile(scores, [0, 0.25, 0.5, 0.75, 1])
 
