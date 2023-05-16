@@ -139,7 +139,6 @@ def parse_columns_grades(classroom: Classroom):
             if len(column.split(':')) > 1:
                 activity_name = unidecode(' '.join((':'.join(column.split(':')[1:])).split(' ')[:-1])).strip()
             else:
-                print(column)
                 activity_name = unidecode(' '.join((':'.join(column.split(':')[1])).split(' ')[:-1])).strip()
 
             try:
@@ -199,14 +198,19 @@ def parse_columns_activities(classroom: Classroom):
             })
 
 if __name__ == "__main__":
-    
-    attendance_report_path = "./tarefas/presenca.csv"
-    grade_report_path = "./tarefas/notas.csv"
-    activity_report_path = "./tarefas/importantes.csv"
+    sheet_id = "1WbqYKXmMg4vkyROidhdEsTEaZLPLkySbbTJqSZKTuKQ"
+    attendance_sheet_name = "presenca"
+    grade_sheet_name = "notas"
+    activity_sheet_name = "importantes"
+
+    attendance_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={attendance_sheet_name}"
+    grade_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={grade_sheet_name}"
+    activity_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={activity_sheet_name}"
+
             
-    attendance_report_doc = pd.read_csv(attendance_report_path, header=3, index_col=0, encoding='latin-1', delimiter=';')
-    grade_report_doc = pd.read_csv(grade_report_path, header=0, index_col=0, encoding='latin-1', delimiter=';')
-    activity_report_doc = pd.read_csv(activity_report_path, header=0, index_col=0, encoding='latin-1', delimiter=';')
+    attendance_report_doc = pd.read_csv(attendance_url, index_col=0)
+    grade_report_doc = pd.read_csv(grade_url, index_col=0)
+    activity_report_doc = pd.read_csv(activity_url, index_col=0)
 
     classroom = Classroom(
         attendance_report_doc=attendance_report_doc,
@@ -280,6 +284,7 @@ if __name__ == "__main__":
     print()
     for category in dropout_chart.keys():
         print(category)
+        print()
         for student in dropout_chart[category]:
-            print(student)
-    print()
+            print(student[0], round(student[1], 2))
+        print()
