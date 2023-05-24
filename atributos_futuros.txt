@@ -1,0 +1,27 @@
+Notas:
+
+    Notas entre 0 e 2.5
+    Notas entre 2,5 e 5
+    Notas entre 5 e 7,5
+    Notas entre 7,5 e 10
+    Notas abaixo de 5
+    Notas acima de 5
+    Notas abaixo da média da turma
+    Notas acima da média da turma
+
+Atividades importantes:
+
+    Notas de atividades importantes abaixo da média da turma
+    Notas de atividades importantes acima da média da turma
+    Numero de atividades importantes realizadas
+    Numero de atividades importantes não realizadas
+    Numero de atividades importantes realizadas acima da média da turma (fez atividades que poucos fizeram)
+    Numero de atividades importantes não realizadas abaixo da média da turma (não fez atividades que todos fizeram)
+
+Presença:
+
+    Numero de ausencias
+    Numero de presenças
+    Numero de presenças acima da média da turma (foi quando outros nao foram)
+    Numero de ausencias abaixo da média da turma (nao foi quando outros foram)
+    Quantidade de faltas sequencias (3 ou mais)
