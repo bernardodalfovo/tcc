@@ -212,6 +212,8 @@ if __name__ == "__main__":
     grade_report_doc = pd.read_csv(grade_url, index_col=0)
     activity_report_doc = pd.read_csv(activity_url, index_col=0)
 
+    test_report_doc = pd.read_csv("https://docs.google.com/spreadsheets/d/1mr3nxTdFLpa8i63oHq5l-Fsp0D5h7hu5dVAIOadjvgg/gviz/tq?tqx=out:csv")
+
     classroom = Classroom(
         attendance_report_doc=attendance_report_doc,
         grade_report_doc=grade_report_doc,
@@ -252,7 +254,18 @@ if __name__ == "__main__":
         # student.classify_dropout()
 
         scores += [student.compute_general_score(interpolate_attendance=False)]
-    
+
+    test_students = [] 
+    for index, name in enumerate(test_report_doc["name"]):
+        temp_student_ = Student(name=test_report_doc["name"][index], index=-1)
+        temp_student_.activity_score = float(test_report_doc["activity_score"][index])
+        temp_student_.grade_score = float(test_report_doc["grade_score"][index])
+        temp_student_.attendance_score = float(test_report_doc["attendance_score"][index])
+        test_students += [temp_student_]
+
+    for student in test_students:
+        scores += [student.compute_general_score(interpolate_attendance=False)]
+
     quartiles = np.quantile(scores, [0, 0.25, 0.5, 0.75, 1])
 
 
@@ -264,7 +277,17 @@ if __name__ == "__main__":
 
     for _, student in classroom.students.items():
         # plot(student=student)
+        if quartiles[3] <= student.general_score <= quartiles[4]:
+            safe += [(student.name, student.general_score)]
+        elif quartiles[2] <= student.general_score < quartiles[3]:
+            relatively_safe += [(student.name, student.general_score)]
+        elif quartiles[1] <= student.general_score < quartiles[2]:
+            relatively_danger += [(student.name, student.general_score)]
+        elif quartiles[0] <= student.general_score < quartiles[1]:
+            danger += [(student.name, student.general_score)]
 
+    for student in test_students:
+        # plot(student=student)
         if quartiles[3] <= student.general_score <= quartiles[4]:
             safe += [(student.name, student.general_score)]
         elif quartiles[2] <= student.general_score < quartiles[3]:

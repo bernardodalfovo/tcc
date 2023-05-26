@@ -16,19 +16,21 @@ class Student():
         self.grade_report = {}
         self.activity_report = {}
 
-        self.general_score = 0.0
-        self.activity_score = 0.0
-        self.attendance_score = 0.0
-        self.overall_mean_attendance_score = 0.0
+        self.general_score = None
+        self.grade_score = None
+        self.activity_score = None
+        self.attendance_score = None
+        self.overall_mean_attendance_score = None
 
     def compute_general_score(self, interpolate_attendance: bool):
         """Calcula a pontuacao geral do aluno no ranking.
 
         Leva em consideracao presenca (1/3), notas (1/3) e realizacao de atividades (1/3).
         """
-        grade_score = self.compute_grade_score()
-        completion_score = self.compute_activity_completion_score()
-        attendance_score = self.compute_attendance_score(interpolate=interpolate_attendance)
+
+        grade_score = self.compute_grade_score() if self.grade_score is None else self.grade_score
+        completion_score = self.compute_activity_completion_score() if self.activity_score is None else self.activity_score
+        attendance_score = self.compute_attendance_score(interpolate=interpolate_attendance) if self.attendance_score is None else self.attendance_score
 
         # print(f"{self.name}, Grade: {round(grade_score, 2)}, Important activities: {round(completion_score, 2)}, attendance: {round(attendance_score, 2)}")
 
@@ -37,6 +39,7 @@ class Student():
             + (completion_score / 3)
             + (attendance_score / 3)
         )
+        
         self.general_score = general_score
         return general_score
 
