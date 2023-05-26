@@ -11,12 +11,12 @@ Notas:
 
 Atividades importantes:
 
-    Notas de atividades importantes abaixo da média da turma
+    Notas de atividades importantes abaixo da média da turma - atividades podem nao ter nota
     Notas de atividades importantes acima da média da turma
     Numero de atividades importantes realizadas
     Numero de atividades importantes não realizadas
-    Numero de atividades importantes realizadas acima da média da turma (fez atividades que poucos fizeram)
-    Numero de atividades importantes não realizadas abaixo da média da turma (não fez atividades que todos fizeram)
+    Numero de atividades importantes realizadas acima da média da turma (fez atividades que poucos fizeram, 50% da turma)
+    Numero de atividades importantes não realizadas abaixo da média da turma (não fez atividades que todos fizeram, 50% da turma)
 
 Presença:
 
@@ -24,4 +24,16 @@ Presença:
     Numero de presenças
     Numero de presenças acima da média da turma (foi quando outros nao foram)
     Numero de ausencias abaixo da média da turma (nao foi quando outros foram)
+    Presenca abaixo da media da turma (geral)
+    Contagem de presenca em faixas (10%, 20%, 30%...)
+    Quantidade de X faltas sequenciais (1 falta - 1 vez, 2 faltas - 3 vezes)
     Quantidade de faltas sequencias (3 ou mais)
+    
+
+Seasonality de faltas - analisar
+
+como usar o modelo de naive bayes
+
+como usar modelos do orange
+
+testar com e sem pontuacao atual
