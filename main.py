@@ -287,20 +287,20 @@ if __name__ == "__main__":
         elif quartiles[0] <= student.general_score < quartiles[1]:
             danger += [(student, student.general_score)]
 
-    for student in test_students:
-        # plot(student=student)
-        if quartiles[3] <= student.general_score <= quartiles[4]:
-            student.classification = "safe"
-            safe += [(student, student.general_score)]
-        elif quartiles[2] <= student.general_score < quartiles[3]:
-            student.classification = "relatively_safe"
-            relatively_safe += [(student, student.general_score)]
-        elif quartiles[1] <= student.general_score < quartiles[2]:
-            student.classification = "relatively_danger"
-            relatively_danger += [(student, student.general_score)]
-        elif quartiles[0] <= student.general_score < quartiles[1]:
-            student.classification = "danger"
-            danger += [(student, student.general_score)]
+    # for student in test_students:
+    #     # plot(student=student)
+    #     if quartiles[3] <= student.general_score <= quartiles[4]:
+    #         student.classification = "safe"
+    #         safe += [(student, student.general_score)]
+    #     elif quartiles[2] <= student.general_score < quartiles[3]:
+    #         student.classification = "relatively_safe"
+    #         relatively_safe += [(student, student.general_score)]
+    #     elif quartiles[1] <= student.general_score < quartiles[2]:
+    #         student.classification = "relatively_danger"
+    #         relatively_danger += [(student, student.general_score)]
+    #     elif quartiles[0] <= student.general_score < quartiles[1]:
+    #         student.classification = "danger"
+    #         danger += [(student, student.general_score)]
     
     dropout_chart = {
         "safe": safe,
