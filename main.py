@@ -107,6 +107,7 @@ def parse_columns_attendance(classroom: Classroom):
             if score_report is not None:
                 classroom.students[index].attendance_report[date_string].update({
                     "mean_score": np.mean(class_score),
+                    "missing_rate": round(int(class_score.count(0.0)/len(class_score)*10))/10*100,
                 })
     for student in classroom.students.keys():
         classroom.students[student].overall_mean_attendance_score = np.mean(overall_score)
@@ -278,24 +279,28 @@ if __name__ == "__main__":
     for _, student in classroom.students.items():
         # plot(student=student)
         if quartiles[3] <= student.general_score <= quartiles[4]:
-            safe += [(student.name, student.general_score)]
+            safe += [(student, student.general_score)]
         elif quartiles[2] <= student.general_score < quartiles[3]:
-            relatively_safe += [(student.name, student.general_score)]
+            relatively_safe += [(student, student.general_score)]
         elif quartiles[1] <= student.general_score < quartiles[2]:
-            relatively_danger += [(student.name, student.general_score)]
+            relatively_danger += [(student, student.general_score)]
         elif quartiles[0] <= student.general_score < quartiles[1]:
-            danger += [(student.name, student.general_score)]
+            danger += [(student, student.general_score)]
 
     for student in test_students:
         # plot(student=student)
         if quartiles[3] <= student.general_score <= quartiles[4]:
-            safe += [(student.name, student.general_score)]
+            student.classification = "safe"
+            safe += [(student, student.general_score)]
         elif quartiles[2] <= student.general_score < quartiles[3]:
-            relatively_safe += [(student.name, student.general_score)]
+            student.classification = "relatively_safe"
+            relatively_safe += [(student, student.general_score)]
         elif quartiles[1] <= student.general_score < quartiles[2]:
-            relatively_danger += [(student.name, student.general_score)]
+            student.classification = "relatively_danger"
+            relatively_danger += [(student, student.general_score)]
         elif quartiles[0] <= student.general_score < quartiles[1]:
-            danger += [(student.name, student.general_score)]
+            student.classification = "danger"
+            danger += [(student, student.general_score)]
     
     dropout_chart = {
         "safe": safe,
@@ -304,10 +309,92 @@ if __name__ == "__main__":
         "danger": danger,
     }
 
+    results = {
+        'name': [],
+        'grades_between_0_2_5': [],
+        'grades_between_2_5_5': [],
+        'grades_between_5_7_5': [],
+        'grades_between_7_5_10': [],
+        'grades_below_5': [],
+        'grades_above_5': [],
+        'grades_below_mean': [],
+        'grades_above_mean': [],
+        'important_activities_complete': [],
+        'important_activities_complete_above_average': [],
+        'important_activities_complete_below_average': [],
+        'important_activities_incomplete': [],
+        'important_activities_incomplete_above_average': [],
+        'important_activities_incomplete_below_average': [],
+        'important_grades_below_mean': [],
+        'important_grades_above_mean': [],
+        'attendance_above_mean': [],
+        'attendance_below_mean': [],
+        'missing': [],
+        'present': [],
+        'partial_presence': [],
+        'amount_sequencial_missing': [],
+        'missing_0': [],
+        'missing_10': [],
+        'missing_20': [],
+        'missing_30': [],
+        'missing_40': [],
+        'missing_50': [],
+        'missing_60': [],
+        'missing_70': [],
+        'missing_80': [],
+        'missing_90': [],
+        'missing_100': [],
+        'classification': [],
+    }
+
+    result_sheet = pd.DataFrame()
+
     print()
     for category in dropout_chart.keys():
         print(category)
         print()
         for student in dropout_chart[category]:
-            print(student[0], round(student[1], 2))
+            results['name'] += [student[0].name]
+            results['grades_between_0_2_5'] += [student[0].grades_between_0_2_5]
+            results['grades_between_2_5_5'] += [student[0].grades_between_2_5_5]
+            results['grades_between_5_7_5'] += [student[0].grades_between_5_7_5]
+            results['grades_between_7_5_10'] += [student[0].grades_between_7_5_10]
+            results['grades_below_5'] += [student[0].grades_below_5]
+            results['grades_above_5'] += [student[0].grades_above_5]
+            results['grades_below_mean'] += [student[0].grades_below_mean]
+            results['grades_above_mean'] += [student[0].grades_above_mean]
+
+            results['important_activities_complete'] += [student[0].important_activities_complete]
+            results['important_activities_complete_above_average'] += [student[0].important_activities_complete_above_average]
+            results['important_activities_complete_below_average'] += [student[0].important_activities_complete_below_average]
+            results['important_activities_incomplete'] += [student[0].important_activities_incomplete]
+            results['important_activities_incomplete_above_average'] += [student[0].important_activities_incomplete_above_average]
+            results['important_activities_incomplete_below_average'] += [student[0].important_activities_incomplete_below_average]
+            results['important_grades_below_mean'] += [student[0].important_grades_below_mean]
+            results['important_grades_above_mean'] += [student[0].important_grades_above_mean]
+
+            results['attendance_above_mean'] += [student[0].attendance_above_mean]
+            results['attendance_below_mean'] += [student[0].attendance_below_mean]
+            results['missing'] += [student[0].missing]
+            results['present'] += [student[0].present]
+            results['partial_presence'] += [student[0].partial_presence]
+            results['amount_sequencial_missing'] += [student[0].amount_sequencial_missing]
+
+            for key in student[0].missing_percentage.keys():
+                results[f'missing_{int(key)}'] += [student[0].missing_percentage[key]]
+
+            for key in student[0].sequencial_missing.keys():
+                attrb_name = f"sequencial_missing_{key}"
+                if attrb_name not in results.keys():
+                    results[attrb_name] = []
+                results[attrb_name] += [student[0].sequencial_missing[key]]
+
+            results['classification'] += [category]
+
+
+            print(student[0].name, round(student[1], 2))
         print()
+
+    result_sheet = pd.DataFrame(results)
+
+    result_sheet.to_csv('result.csv', index=False)

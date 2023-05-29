@@ -12,15 +12,67 @@ class Student():
         self.progression = []
         self.weighted_progression = []
 
-        self.attendance_report = {}
-        self.grade_report = {}
-        self.activity_report = {}
-
         self.general_score = None
-        self.grade_score = None
-        self.activity_score = None
-        self.attendance_score = None
         self.overall_mean_attendance_score = None
+
+        self.grade_report = {}
+        self.grade_score = None
+        self.grades_between_0_2_5 = 0
+        self.grades_between_2_5_5 = 0
+        self.grades_between_5_7_5 = 0
+        self.grades_between_7_5_10 = 0
+        self.grades_below_5 = 0
+        self.grades_above_5 = 0
+        self.grades_below_mean = 0
+        self.grades_above_mean = 0
+
+        self.activity_report = {}
+        self.activity_score = None
+        self.important_activities_complete = 0
+        self.important_activities_complete_above_average = 0
+        self.important_activities_complete_below_average = 0
+        self.important_activities_incomplete = 0
+        self.important_activities_incomplete_above_average = 0
+        self.important_activities_incomplete_below_average = 0
+        self.important_grades_below_mean = 0
+        self.important_grades_above_mean = 0
+
+        self.attendance_report = {}
+        self.attendance_score = None
+        self.attendance_above_mean = 0
+        self.attendance_below_mean = 0
+        self.missing = 0
+        self.present = 0
+        self.partial_presence = 0
+        self.amount_sequencial_missing = 0
+        self.missing_percentage = {
+            0.0: 0,
+            10.0: 0,
+            20.0: 0,
+            30.0: 0,
+            40.0: 0,
+            50.0: 0,
+            60.0: 0,
+            70.0: 0,
+            80.0: 0,
+            90.0: 0,
+            100.0: 0,
+        }
+
+        self.sequencial_missing = {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0,
+            7: 0,
+            8: 0,
+            9: 0,
+            10: 0,
+        }
+
 
     def compute_general_score(self, interpolate_attendance: bool):
         """Calcula a pontuacao geral do aluno no ranking.
@@ -52,6 +104,24 @@ class Student():
             # max_score += 10 * self.grade_report[activity]["grade"]
             # perda de score = (quao baixa eh a nota em relacao a mais alta) * media de notas da sala inteira
             class_grade_weight = self.grade_report[activity]["mean_grade"] / 10
+            if 0 <= self.grade_report[activity]["grade"] <= 2.5:
+                self.grades_between_0_2_5 += 1
+                self.grades_below_5 += 1
+            elif 2.5 < self.grade_report[activity]["grade"] <= 5:
+                self.grades_between_2_5_5 += 1
+                self.grades_below_5 += 1
+            elif 5 < self.grade_report[activity]["grade"] <= 7.5:
+                self.grades_between_5_7_5 += 1
+                self.grades_above_5 += 1
+            elif 7.5 < self.grade_report[activity]["grade"] <= 10:
+                self.grades_between_7_5_10 += 1
+                self.grades_above_5 += 1
+
+            if self.grade_report[activity]["grade"] < self.grade_report[activity]["mean_grade"]:
+                self.grades_below_mean += 1
+            else:
+                self.grades_above_mean += 1
+
             grade_compared_to_highest = (10 - (self.grade_report[activity]["grade"] * 10 / self.grade_report[activity]["highest_grade"]))
             grade_anti_score += grade_compared_to_highest * class_grade_weight
         
@@ -75,6 +145,25 @@ class Student():
             # more weight to important activities
             activity_weight = important_weight if is_important else 1.0
 
+            if is_important:
+                if completed:
+                    self.important_activities_complete += 1
+                    if self.grade_report[activity]["completion_rate"] >= 0.5:
+                        self.important_activities_complete_above_average += 1
+                    else:
+                        self.important_activities_complete_below_average += 1
+                else:
+                    self.important_activities_incomplete += 1
+                    if self.grade_report[activity]["completion_rate"] >= 0.5:
+                        self.important_activities_incomplete_above_average += 1
+                    else:
+                        self.important_activities_incomplete_below_average += 1
+                if self.grade_report[activity]["grade"] < self.grade_report[activity]["mean_grade"]:
+                    self.important_grades_below_mean += 1
+                else:
+                    self.important_grades_above_mean += 1
+                
+
             max_score += activity_weight
             activity_anti_score += (activity_weight * self.grade_report[activity]["completion_rate"]) if not completed else 0.0
             
@@ -85,12 +174,16 @@ class Student():
         """Compute student's attendance score.
         """
         report = self.attendance_report
+        missing_rate = []
+        mean_scores = []
         max_score = []
         max_valid_score = []
         date_weights = []
         progression = []
 
         for index, date in enumerate(report.keys()):
+            missing_rate += [report[date]["missing_rate"]]
+            mean_scores += [report[date]["mean_score"]]
             max_score += [report[date]["max_score"]]
             # do not compute days in which everyone was present
             if report[date]["valid"]:
@@ -117,6 +210,32 @@ class Student():
             progression = self.interpolate_progression(progression=progression)
 
         self.progression = progression
+
+        missing_sequencial_count = 0
+        for index, score in enumerate(progression):
+            if score < mean_scores[index]:
+                self.attendance_above_mean += 1
+            else:
+                self.attendance_below_mean += 1
+            if score == 0.0:
+                missing_sequencial_count += 1
+                self.missing += 1
+                if missing_rate[index] not in self.missing_percentage.keys():
+                    self.missing_percentage[missing_rate[index]] = 0
+                self.missing_percentage[missing_rate[index]] += 1
+            else:
+                if missing_sequencial_count > 0:
+                    if missing_sequencial_count not in self.sequencial_missing.keys():
+                        self.sequencial_missing[missing_sequencial_count] = 0
+                    self.sequencial_missing[missing_sequencial_count] += 1
+                    if missing_sequencial_count >= 3:
+                        self.amount_sequencial_missing += 1
+                missing_sequencial_count = 0
+                if score == max_score[index]:
+                    self.present += 1
+                else:
+                    self.partial_presence += 1
+
 
         weighted_anti_progression = []
         for index, data in enumerate(progression):

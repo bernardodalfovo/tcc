@@ -21,10 +21,10 @@ Atividades importantes:
 Presença:
 
     Numero de ausencias
-    Numero de presenças
+    Numero de score maximo
+    Numero de score parcial
     Numero de presenças acima da média da turma (foi quando outros nao foram)
     Numero de ausencias abaixo da média da turma (nao foi quando outros foram)
-    Presenca abaixo da media da turma (geral)
     Contagem de presenca em faixas (10%, 20%, 30%...)
     Quantidade de X faltas sequenciais (1 falta - 1 vez, 2 faltas - 3 vezes)
     Quantidade de faltas sequencias (3 ou mais)
@@ -37,3 +37,6 @@ como usar o modelo de naive bayes
 como usar modelos do orange
 
 testar com e sem pontuacao atual
+
+diferencas da reuniao conversada com professor:
+mudar para porcentagens ao inves de valores nominais
