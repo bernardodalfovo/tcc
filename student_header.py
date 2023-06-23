@@ -84,7 +84,7 @@ class Student():
         completion_score = self.compute_activity_completion_score() if self.activity_score is None else self.activity_score
         attendance_score = self.compute_attendance_score(interpolate=interpolate_attendance) if self.attendance_score is None else self.attendance_score
 
-        # print(f"{self.name}, Grade: {round(grade_score, 2)}, Important activities: {round(completion_score, 2)}, attendance: {round(attendance_score, 2)}")
+        # print(f"{self.name}, Grade: {round(grade_score, 2)}, Activity completion: {round(completion_score, 2)}, attendance: {round(attendance_score, 2)}")
 
         general_score = (
             (grade_score / 3)
