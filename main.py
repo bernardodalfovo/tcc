@@ -137,11 +137,14 @@ def parse_columns_grades(classroom: Classroom):
         all_grades = []
         for i, (_, report) in enumerate(classroom.grade_report[column].items()):
             index = i + 1
-            if len(column.split(':')) > 1:
-                activity_name = unidecode(' '.join((':'.join(column.split(':')[1:])).split(' ')[:-1])).strip()
-            else:
-                activity_name = unidecode(' '.join((':'.join(column.split(':')[1])).split(' ')[:-1])).strip()
 
+            activity_name = column
+            if ':' in activity_name:
+                if len(column.split(':')) > 1:
+                    activity_name = unidecode(' '.join((':'.join(column.split(':')[1:])).split(' ')[:-1])).strip()
+                else:
+                    activity_name = unidecode(' '.join((':'.join(column.split(':')[1])).split(' ')[:-1])).strip()
+                
             try:
                 grade = float(report)
             except ValueError:
@@ -200,6 +203,7 @@ def parse_columns_activities(classroom: Classroom):
 
 if __name__ == "__main__":
     sheet_id = "1WbqYKXmMg4vkyROidhdEsTEaZLPLkySbbTJqSZKTuKQ"
+    sheet_id = "1Ol0xuLtDwJw4CndlL__dwKI0cDY3aCvA-ELrBotKn3E"
     attendance_sheet_name = "presenca"
     grade_sheet_name = "notas"
     activity_sheet_name = "importantes"
@@ -208,12 +212,22 @@ if __name__ == "__main__":
     grade_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={grade_sheet_name}"
     activity_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={activity_sheet_name}"
 
-            
-    attendance_report_doc = pd.read_csv(attendance_url, index_col=0)
-    grade_report_doc = pd.read_csv(grade_url, index_col=0)
-    activity_report_doc = pd.read_csv(activity_url, index_col=0)
+    try:
+        attendance_report_doc = pd.read_csv(attendance_url, index_col=0)
+    except pd.errors.EmptyDataError:
+        attendance_report_doc = pd.DataFrame()
+    
+    try:
+        grade_report_doc = pd.read_csv(grade_url, index_col=0)
+    except pd.errors.EmptyDataError:
+        grade_report_doc = pd.DataFrame()
 
-    test_report_doc = pd.read_csv("https://docs.google.com/spreadsheets/d/1mr3nxTdFLpa8i63oHq5l-Fsp0D5h7hu5dVAIOadjvgg/gviz/tq?tqx=out:csv")
+    try:
+        activity_report_doc = pd.read_csv(activity_url, index_col=0)
+    except pd.errors.EmptyDataError:
+        activity_report_doc = pd.DataFrame()
+
+    # test_report_doc = pd.read_csv("https://docs.google.com/spreadsheets/d/1mr3nxTdFLpa8i63oHq5l-Fsp0D5h7hu5dVAIOadjvgg/gviz/tq?tqx=out:csv")
 
     classroom = Classroom(
         attendance_report_doc=attendance_report_doc,
@@ -256,16 +270,16 @@ if __name__ == "__main__":
 
         scores += [student.compute_general_score(interpolate_attendance=False)]
 
-    test_students = [] 
-    for index, name in enumerate(test_report_doc["name"]):
-        temp_student_ = Student(name=test_report_doc["name"][index], index=-1)
-        temp_student_.activity_score = float(test_report_doc["activity_score"][index])
-        temp_student_.grade_score = float(test_report_doc["grade_score"][index])
-        temp_student_.attendance_score = float(test_report_doc["attendance_score"][index])
-        test_students += [temp_student_]
+    # test_students = [] 
+    # for index, name in enumerate(test_report_doc["name"]):
+    #     temp_student_ = Student(name=test_report_doc["name"][index], index=-1)
+    #     temp_student_.activity_score = float(test_report_doc["activity_score"][index])
+    #     temp_student_.grade_score = float(test_report_doc["grade_score"][index])
+    #     temp_student_.attendance_score = float(test_report_doc["attendance_score"][index])
+    #     test_students += [temp_student_]
 
-    for student in test_students:
-        scores += [student.compute_general_score(interpolate_attendance=False)]
+    # for student in test_students:
+    #     scores += [student.compute_general_score(interpolate_attendance=False)]
 
     quartiles = np.quantile(scores, [0, 0.25, 0.5, 0.75, 1])
 
