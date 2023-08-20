@@ -198,6 +198,7 @@ class Student():
                     if data is not None:
                         progression += [data]
                         date_weights += [self.overall_mean_attendance_score / report[date]["max_score"]]
+                        break
             else:
                 progression += [None]
                 date_weights += [self.overall_mean_attendance_score / report[date]["max_score"]]
@@ -213,6 +214,9 @@ class Student():
 
         missing_sequencial_count = 0
         for index, score in enumerate(progression):
+            if score is None:
+                # continue # check which is better
+                score = max_score[index]
             if score < mean_scores[index]:
                 self.attendance_above_mean += 1
             else:
@@ -243,7 +247,6 @@ class Student():
                 weighted_anti_progression += [(data * date_weights[index]) if data < max_score[index] else max_score[index]]
         
         self.weighted_progression = weighted_anti_progression
-
         attendance_score = np.sum(weighted_anti_progression) / np.sum(max_score if interpolate else max_valid_score) * 100
 
         return attendance_score
