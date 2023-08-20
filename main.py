@@ -2,6 +2,7 @@ import pandas as pd
 import sys
 import re
 from datetime import datetime
+import random
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -9,6 +10,8 @@ from unidecode import unidecode
 
 from classroom_header import Classroom
 from student_header import Student
+
+ratio_evaluation = 1.0
 
 def plot(student: Student):
     """Plot attendances.
@@ -81,14 +84,37 @@ def parse_columns_attendance(classroom: Classroom):
     for column in classroom.attendance_report.columns:
         if bool(re.search(r"\d{1,2}\/\d{1,2}\/\d{4}", column)):
             attendance_columns += [column]
+    attendance_columns = attendance_columns[:int(len(attendance_columns) * ratio_evaluation)]
+
+    max_max_score = 0
+    for column in attendance_columns:
+        gen_max_score = 0
+        for report in list(classroom.attendance_report[column]):
+            if str(report) == "nan" or report is None:
+                continue
+            score_report = re.search(r"\((\d+)/(\d+)\)", str(report))
+            if score_report is not None:
+                gen_max_score = float(score_report.group(2))
+                break
+        if gen_max_score > max_max_score:
+            max_max_score = gen_max_score
+
     overall_score = []
     for column in attendance_columns:
         class_score = []
-        date_string = re.search(r"\d{1,2}\/\d{1,2}\/\d{4}", column).group()
+        date_string = re.search(r"\d{1,2}\/\d{1,2}\/\d{4}", str(column)).group()
         valid = True
         if (classroom.attendance_report[column] == list(classroom.attendance_report[column])[0]).all():
-            # considerar "?" invalido?
             valid = False
+
+        gen_max_score = 0
+        if valid:
+            for report in list(classroom.attendance_report[column]):
+                score_report = re.search(r"\((\d+)/(\d+)\)", str(report))
+                if score_report is not None:
+                    gen_max_score = float(score_report.group(2))
+                    break
+    
         for index, report in classroom.attendance_report[column].items():
             score_report = re.search(r"\((\d+)/(\d+)\)", report)
             if score_report is not None:
@@ -102,9 +128,31 @@ def parse_columns_attendance(classroom: Classroom):
                     "score": float(score),
                     "valid": valid,
                 }
+            elif report == "?" and valid:
+                score = 0.0
+                class_score += [float(score)]
+                overall_score += [float(score)]
+                max_score = gen_max_score
+
+                classroom.students[index].attendance_report[date_string] = {
+                    "max_score": float(max_score),
+                    "score": float(score),
+                    "valid": valid,
+                }
+            elif report == "?":
+                score = max_max_score
+                class_score += [float(score)]
+                overall_score += [float(score)]
+                max_score = max_max_score
+
+                classroom.students[index].attendance_report[date_string] = {
+                    "max_score": float(max_score),
+                    "score": float(score),
+                    "valid": valid,
+                }
         for index, report in classroom.attendance_report[column].items():
             score_report = re.search(r"\((\d+)/(\d+)\)", report)
-            if score_report is not None:
+            if score_report is not None or report == "?":
                 classroom.students[index].attendance_report[date_string].update({
                     "mean_score": np.mean(class_score),
                     "missing_rate": round(int(class_score.count(0.0)/len(class_score)*10))/10*100,
@@ -123,6 +171,7 @@ def parse_columns_grades(classroom: Classroom):
         "curso",
         "matricula",
         "download",
+        "presenca",
     ]
     for column in classroom.grade_report.columns:
         is_grade_column = True
@@ -132,6 +181,14 @@ def parse_columns_grades(classroom: Classroom):
                 break
         if is_grade_column:
             grade_columns += [column]
+
+    # randomize columns if ratio_evaluation < 1.0
+    # so there is no bias
+    if ratio_evaluation < 1.0:
+        random.shuffle(grade_columns)
+    
+    grade_columns = grade_columns[:int(len(grade_columns) * ratio_evaluation)]
+
     for column in grade_columns:
         highest_grade = -1
         all_grades = []
@@ -202,8 +259,10 @@ def parse_columns_activities(classroom: Classroom):
             })
 
 if __name__ == "__main__":
-    sheet_id = "1WbqYKXmMg4vkyROidhdEsTEaZLPLkySbbTJqSZKTuKQ"
-    sheet_id = "1Ol0xuLtDwJw4CndlL__dwKI0cDY3aCvA-ELrBotKn3E"
+    sheet_id = "1WbqYKXmMg4vkyROidhdEsTEaZLPLkySbbTJqSZKTuKQ" # fake, grades, attendence and important activities
+    sheet_id = "1Ol0xuLtDwJw4CndlL__dwKI0cDY3aCvA-ELrBotKn3E" # real, only grades and attendence
+    sheet_id = "1SAY_0d6xP_SffE5kvjmzYPPDRjAm1iLjmXsZ1n6Uzvo" # real 2, only grades and attendence
+
     attendance_sheet_name = "presenca"
     grade_sheet_name = "notas"
     activity_sheet_name = "importantes"
@@ -323,6 +382,78 @@ if __name__ == "__main__":
         "danger": danger,
     }
 
+    # dropouts = [
+    #     'Aluno 1',  # d
+    #     'Aluno 8',  # nd but hard
+    #     'Aluno 9',  # d
+    #     'Aluno 10', # d
+    #     'Aluno 11', # d
+    #     'Aluno 16', # d and hard
+    #     'Aluno 20', # d
+    #     'Aluno 30', # d
+    #     'Aluno 35', # d
+    #     'Aluno 40', # d
+    # ]
+
+    dropouts = [
+        "1",
+        "6",
+        "8", #hard
+        "11",
+        "14",
+        "18",
+        "20",
+        "21", #hard
+        "22",
+        "24",
+        "31",
+        "34",
+        "35", #hard
+        "38", #hard
+        "39",
+        "44",
+        "50",
+        "52",
+        "54",
+        "61",
+        "65",
+        "66",
+        "68",
+        "72", #hard
+        "73",
+        "74",
+        "75",
+        "76",
+        "78",
+        "80",
+        "85",
+        "86",
+    ]
+
+    confusion_matrix = {
+        "true_positive": 0,
+        "true_negative": 0,
+        "false_positive": 0,
+        "false_negative": 0,
+    }
+
+    for category in dropout_chart.keys():
+        print("\n", category, "\n")
+        for student in sorted(dropout_chart[category], key=lambda x: x[1], reverse=True):
+            print(student[0].name, round(student[1], 2))
+            if "danger" in category:
+                if str(student[0].name) in dropouts:
+                    confusion_matrix["true_positive"] += 1
+                else:
+                    confusion_matrix["false_positive"] += 1
+            else:
+                if str(student[0].name) in dropouts:
+                    confusion_matrix["false_negative"] += 1
+                else:
+                    confusion_matrix["true_negative"] += 1
+    
+    print(confusion_matrix)
+
     results = {
         'name': [],
         'grades_between_0_2_5': [],
@@ -361,12 +492,9 @@ if __name__ == "__main__":
         'classification': [],
     }
 
+    # export attributes for implicit analysis
     result_sheet = pd.DataFrame()
-
-    print()
     for category in dropout_chart.keys():
-        print(category)
-        print()
         for student in dropout_chart[category]:
             results['name'] += [student[0].name]
             results['grades_between_0_2_5'] += [student[0].grades_between_0_2_5]
@@ -404,11 +532,5 @@ if __name__ == "__main__":
                 results[attrb_name] += [student[0].sequencial_missing[key]]
 
             results['classification'] += [category]
-
-
-            print(student[0].name, round(student[1], 2))
-        print()
-
     result_sheet = pd.DataFrame(results)
-
     result_sheet.to_csv('result.csv', index=False)
