@@ -438,9 +438,9 @@ if __name__ == "__main__":
     }
 
     for category in dropout_chart.keys():
-        print("\n", category, "\n")
+        # print("\n", category, "\n")
         for student in sorted(dropout_chart[category], key=lambda x: x[1], reverse=True):
-            print(student[0].name, round(student[1], 2))
+            # print(student[0].name, round(student[1], 2))
             if "danger" in category:
                 if str(student[0].name) in dropouts:
                     confusion_matrix["true_positive"] += 1
@@ -452,7 +452,7 @@ if __name__ == "__main__":
                 else:
                     confusion_matrix["true_negative"] += 1
     
-    print(confusion_matrix)
+    # print(confusion_matrix)
 
     results = {
         'name': [],
@@ -493,7 +493,6 @@ if __name__ == "__main__":
     }
 
     # export attributes for implicit analysis
-    result_sheet = pd.DataFrame()
     for category in dropout_chart.keys():
         for student in dropout_chart[category]:
             results['name'] += [student[0].name]
@@ -532,5 +531,20 @@ if __name__ == "__main__":
                 results[attrb_name] += [student[0].sequencial_missing[key]]
 
             results['classification'] += [category]
+    
+    # get length of all keys in results
+    # print them: key, length
+    keys_to_remove = []
+    for key in results.keys():
+        # if "sequencial_missing_" in key and all elements in list are 0
+        # remove key from results after end of loop
+        if "sequencial_missing_" in key and all([i == 0 for i in results[key]]):
+            keys_to_remove += [key]
+    for key in keys_to_remove:
+        results.pop(key)
+    
+    # export results
     result_sheet = pd.DataFrame(results)
+    # sort dataframe by name
+    result_sheet = result_sheet.sort_values(by=['name'])
     result_sheet.to_csv('result.csv', index=False)

@@ -59,19 +59,9 @@ class Student():
             100.0: 0,
         }
 
-        self.sequencial_missing = {
-            0: 0,
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-            7: 0,
-            8: 0,
-            9: 0,
-            10: 0,
-        }
+        self.sequencial_missing = {}
+        for i in range(0, 501):
+            self.sequencial_missing[i] = 0
 
 
     def compute_general_score(self, interpolate_attendance: bool):
