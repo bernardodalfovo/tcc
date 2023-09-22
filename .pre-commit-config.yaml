@@ -1,0 +1,36 @@
+repos:
+-   repo: https://github.com/asottile/reorder_python_imports
+    rev: v2.6.0
+    hooks:
+    - id: reorder-python-imports
+- repo: https://github.com/myint/docformatter
+  rev: v1.3.1
+  hooks:
+    - id: docformatter
+      args: [--in-place, --wrap-summaries, "88", --wrap-descriptions, "88"]
+-   repo: https://github.com/asottile/blacken-docs
+    rev: v1.12.1
+    hooks:
+    - id: blacken-docs
+-   repo: https://github.com/ambv/black
+    rev: 22.3.0
+    hooks:
+    - id: black
+      language_version: python3.11
+-   repo: https://github.com/pycqa/pydocstyle
+    rev: 6.1.1
+    hooks:
+    - id: pydocstyle
+      exclude: ^(tests/|tsaf/qmt/)
+      args:
+        - --ignore=D100,D104,D203,D213
+# -   repo: https://gitlab.com/pycqa/flake8
+#     rev: 3.8.4
+#     hooks:
+#     - id: flake8
+-   repo: https://github.com/PyCQA/bandit
+    rev: 1.7.4
+    hooks:
+    - id: bandit
+      args: [--skip, "B101", --recursive, clumper]
+      exclude: ^(benchmarks/download_data.py)

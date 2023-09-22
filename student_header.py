@@ -1,10 +1,12 @@
 import numpy as np
 from scipy.interpolate import interp1d
 
-class Student():
-    """Student class.
-    """
+
+class Student:
+    """Student class."""
+
     def __init__(self, name: str, index: int) -> None:
+        """Initialize student object."""
         self.index = index
         self.name = name
         self.percentage = 0.0
@@ -25,6 +27,7 @@ class Student():
         self.grades_above_5 = 0
         self.grades_below_mean = 0
         self.grades_above_mean = 0
+        self.grades_sum = 0
 
         self.activity_report = {}
         self.activity_score = None
@@ -36,6 +39,13 @@ class Student():
         self.important_activities_incomplete_below_average = 0
         self.important_grades_below_mean = 0
         self.important_grades_above_mean = 0
+
+        self.activities_complete = 0
+        self.activities_complete_above_average = 0
+        self.activities_complete_below_average = 0
+        self.activities_incomplete = 0
+        self.activities_incomplete_above_average = 0
+        self.activities_incomplete_below_average = 0
 
         self.attendance_report = {}
         self.attendance_score = None
@@ -63,31 +73,37 @@ class Student():
         for i in range(0, 501):
             self.sequencial_missing[i] = 0
 
-
     def compute_general_score(self, interpolate_attendance: bool):
         """Calcula a pontuacao geral do aluno no ranking.
 
-        Leva em consideracao presenca (1/3), notas (1/3) e realizacao de atividades (1/3).
+        Leva em consideracao presenca (1/3), notas (1/3) e realizacao de atividades
+        (1/3).
         """
-
-        grade_score = self.compute_grade_score() if self.grade_score is None else self.grade_score
-        completion_score = self.compute_activity_completion_score() if self.activity_score is None else self.activity_score
-        attendance_score = self.compute_attendance_score(interpolate=interpolate_attendance) if self.attendance_score is None else self.attendance_score
+        grade_score = (
+            self.compute_grade_score() if self.grade_score is None else self.grade_score
+        )
+        completion_score = (
+            self.compute_activity_completion_score()
+            if self.activity_score is None
+            else self.activity_score
+        )
+        attendance_score = (
+            self.compute_attendance_score(interpolate=interpolate_attendance)
+            if self.attendance_score is None
+            else self.attendance_score
+        )
 
         # print(f"{self.name}, Grade: {round(grade_score, 2)}, Activity completion: {round(completion_score, 2)}, attendance: {round(attendance_score, 2)}")
 
         general_score = (
-            (grade_score / 3)
-            + (completion_score / 3)
-            + (attendance_score / 3)
+            (grade_score / 3) + (completion_score / 3) + (attendance_score / 3)
         )
-        
+
         self.general_score = general_score
         return general_score
 
     def compute_grade_score(self):
-        """Calcula o score associado a notas e pesos atribuidos.
-        """
+        """Calcula o score associado a notas e pesos atribuidos."""
         max_score = 10 * len(self.grade_report)
         grade_anti_score = 0.0
         for activity in self.grade_report.keys():
@@ -107,19 +123,27 @@ class Student():
                 self.grades_between_7_5_10 += 1
                 self.grades_above_5 += 1
 
-            if self.grade_report[activity]["grade"] < self.grade_report[activity]["mean_grade"]:
+            if (
+                self.grade_report[activity]["grade"]
+                < self.grade_report[activity]["mean_grade"]
+            ):
                 self.grades_below_mean += 1
             else:
                 self.grades_above_mean += 1
 
-            grade_compared_to_highest = (10 - (self.grade_report[activity]["grade"] * 10 / self.grade_report[activity]["highest_grade"]))
+            self.grades_sum += self.grade_report[activity]["grade"]
+
+            grade_compared_to_highest = 10 - (
+                self.grade_report[activity]["grade"]
+                * 10
+                / self.grade_report[activity]["highest_grade"]
+            )
             grade_anti_score += grade_compared_to_highest * class_grade_weight
-        
+
         return (max_score - grade_anti_score) / max_score * 100
 
     def compute_activity_completion_score(self):
-        """Calcula o score associado a finalizacao de atividades.
-        """
+        """Calcula o score associado a finalizacao de atividades."""
         # atividades importantes
         # e atividades nao importantes (que estao no report de notas)
         max_score = 0.0
@@ -135,34 +159,52 @@ class Student():
             # more weight to important activities
             activity_weight = important_weight if is_important else 1.0
 
-            if is_important:
-                if completed:
+            if completed:
+                if is_important:
                     self.important_activities_complete += 1
                     if self.grade_report[activity]["completion_rate"] >= 0.5:
                         self.important_activities_complete_above_average += 1
                     else:
                         self.important_activities_complete_below_average += 1
                 else:
+                    self.activities_complete += 1
+                    if self.grade_report[activity]["completion_rate"] >= 0.5:
+                        self.activities_complete_above_average += 1
+                    else:
+                        self.activities_complete_below_average += 1
+            else:
+                if is_important:
                     self.important_activities_incomplete += 1
                     if self.grade_report[activity]["completion_rate"] >= 0.5:
                         self.important_activities_incomplete_above_average += 1
                     else:
                         self.important_activities_incomplete_below_average += 1
-                if self.grade_report[activity]["grade"] < self.grade_report[activity]["mean_grade"]:
-                    self.important_grades_below_mean += 1
                 else:
-                    self.important_grades_above_mean += 1
-                
+                    self.activities_incomplete += 1
+                    if self.grade_report[activity]["completion_rate"] >= 0.5:
+                        self.activities_incomplete_above_average += 1
+                    else:
+                        self.activities_incomplete_below_average += 1
+
+            if (
+                self.grade_report[activity]["grade"]
+                < self.grade_report[activity]["mean_grade"]
+            ):
+                self.grades_below_mean += 1
+            else:
+                self.grades_above_mean += 1
 
             max_score += activity_weight
-            activity_anti_score += (activity_weight * self.grade_report[activity]["completion_rate"]) if not completed else 0.0
-            
+            activity_anti_score += (
+                (activity_weight * self.grade_report[activity]["completion_rate"])
+                if not completed
+                else 0.0
+            )
+
         return (max_score - activity_anti_score) / max_score * 100
 
-    
     def compute_attendance_score(self, interpolate: bool):
-        """Compute student's attendance score.
-        """
+        """Compute student's attendance score."""
         report = self.attendance_report
         missing_rate = []
         mean_scores = []
@@ -181,22 +223,29 @@ class Student():
                 progression += [report[date]["score"]]
                 max_valid_score += [report[date]["max_score"]]
                 date_weights += [report[date]["mean_score"] / report[date]["max_score"]]
-            elif index+1 == len(report) and interpolate:
+            elif index + 1 == len(report) and interpolate:
                 # get last valid datapoint if very last datapoint is not valid
                 # so that interpolation goes until last datapoint
                 for i, data in enumerate(progression[::-1]):
                     if data is not None:
                         progression += [data]
-                        date_weights += [self.overall_mean_attendance_score / report[date]["max_score"]]
+                        date_weights += [
+                            self.overall_mean_attendance_score
+                            / report[date]["max_score"]
+                        ]
                         break
             else:
                 progression += [None]
-                date_weights += [self.overall_mean_attendance_score / report[date]["max_score"]]
+                date_weights += [
+                    self.overall_mean_attendance_score / report[date]["max_score"]
+                ]
         if progression[0] is None and interpolate:
-                # get mean score if very first datapoint is not valid
-                # so that interpolation goes from the first datapoint
-                progression[0] = np.mean([i for i in progression if i is not None])
-                date_weights[0] = self.overall_mean_attendance_score / report[date]["max_score"]
+            # get mean score if very first datapoint is not valid
+            # so that interpolation goes from the first datapoint
+            progression[0] = np.mean([i for i in progression if i is not None])
+            date_weights[0] = (
+                self.overall_mean_attendance_score / report[date]["max_score"]
+            )
         if interpolate:
             progression = self.interpolate_progression(progression=progression)
 
@@ -208,9 +257,9 @@ class Student():
                 # continue # check which is better
                 score = max_score[index]
             if score < mean_scores[index]:
-                self.attendance_above_mean += 1
-            else:
                 self.attendance_below_mean += 1
+            else:
+                self.attendance_above_mean += 1
             if score == 0.0:
                 missing_sequencial_count += 1
                 self.missing += 1
@@ -230,20 +279,26 @@ class Student():
                 else:
                     self.partial_presence += 1
 
-
         weighted_anti_progression = []
         for index, data in enumerate(progression):
             if data is not None:
-                weighted_anti_progression += [(data * date_weights[index]) if data < max_score[index] else max_score[index]]
-        
+                weighted_anti_progression += [
+                    (data * date_weights[index])
+                    if data < max_score[index]
+                    else max_score[index]
+                ]
+
         self.weighted_progression = weighted_anti_progression
-        attendance_score = np.sum(weighted_anti_progression) / np.sum(max_score if interpolate else max_valid_score) * 100
+        attendance_score = (
+            np.sum(weighted_anti_progression)
+            / np.sum(max_score if interpolate else max_valid_score)
+            * 100
+        )
 
         return attendance_score
-    
+
     def interpolate_progression(self, progression: list):
-        """Interpola pontuacao para dias invalidos.
-        """
+        """Interpola pontuacao para dias invalidos."""
         x = []
         y = []
         for index, datapoint in enumerate(progression):
@@ -252,16 +307,15 @@ class Student():
                 y += [datapoint]
                 # x += [datapoint[0]]     # datetime
                 # y += [datapoint[1]]     # score
-        f = interp1d(x,y)
+        f = interp1d(x, y)
 
         xnew = [i for i in range(len(self.attendance_report))]
         ynew = f(xnew)
 
         return ynew
-    
+
     def classify_dropout(self):
-        """Classifica se estudante desistiu.
-        """
+        """Classifica se estudante desistiu."""
         count_drops = 0
         for datapoint in self.chosen_progression_bool:
             if not datapoint:
