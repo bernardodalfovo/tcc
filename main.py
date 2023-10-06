@@ -21,27 +21,27 @@ results = {
     "grades_between_5_7_5": [],
     "grades_between_7_5_10": [],
     "grades_below_5": [],
-    "grades_above_5": [],
+    # "grades_above_5": [],
     "grades_below_mean": [],
     "grades_above_mean": [],
-    "important_activities_complete": [],
-    "important_activities_complete_above_average": [],
+    # "important_activities_complete": [],
+    # "important_activities_complete_above_average": [],
     "important_activities_complete_below_average": [],
     "important_activities_incomplete": [],
-    "important_activities_incomplete_above_average": [],
+    # "important_activities_incomplete_above_average": [],
     "important_activities_incomplete_below_average": [],
     "important_grades_below_mean": [],
-    "important_grades_above_mean": [],
-    "activities_complete": [],
-    "activities_complete_above_average": [],
+    # "important_grades_above_mean": [],
+    # "activities_complete": [],
+    # "activities_complete_above_average": [],
     "activities_complete_below_average": [],
     "activities_incomplete": [],
-    "activities_incomplete_above_average": [],
+    # "activities_incomplete_above_average": [],
     "activities_incomplete_below_average": [],
-    "attendance_above_mean": [],
+    # "attendance_above_mean": [],
     "attendance_below_mean": [],
     "missing": [],
-    "present": [],
+    # "present": [],
     "partial_presence": [],
     "amount_sequencial_missing": [],
     "classification": [],
@@ -322,33 +322,39 @@ if __name__ == "__main__":
         "1SAY_0d6xP_SffE5kvjmzYPPDRjAm1iLjmXsZ1n6Uzvo",  # real 2, only grades and attendence
     ]
 
+    hard_to_detect = [
+        # turma 1
+        "Aluno 8",  # hard
+        "Aluno 16",  # hard
+        # turma 2
+        "8",  # hard
+        "21",  # hard
+        "35",  # hard
+        "38",  # hard
+        "72",  # hard
+    ]
+
     dropouts = [
         # turma 1
-        "Aluno 1",  # d
-        "Aluno 8",  # nd but hard
-        "Aluno 9",  # d
-        "Aluno 10",  # d
-        "Aluno 11",  # d
-        "Aluno 16",  # d and hard
-        "Aluno 20",  # d
-        "Aluno 30",  # d
-        "Aluno 35",  # d
-        "Aluno 40",  # d
+        "Aluno 1",
+        "Aluno 9",
+        "Aluno 10",
+        "Aluno 11",
+        "Aluno 20",
+        "Aluno 30",
+        "Aluno 35",
+        "Aluno 40",
         # turma 2
         "1",
         "6",
-        "8",  # hard
         "11",
         "14",
         "18",
         "20",
-        "21",  # hard
         "22",
         "24",
         "31",
         "34",
-        "35",  # hard
-        "38",  # hard
         "39",
         "44",
         "50",
@@ -358,7 +364,6 @@ if __name__ == "__main__":
         "65",
         "66",
         "68",
-        "72",  # hard
         "73",
         "74",
         "75",
@@ -369,12 +374,14 @@ if __name__ == "__main__":
         "86",
     ]
 
+    dropouts += hard_to_detect
+
     scores = []
 
-    safe = []
-    relatively_safe = []
-    relatively_danger = []
-    danger = []
+    negative = []  # non-dropout
+    relatively_negative = []
+    relatively_positive = []
+    positive = []  # dropout
 
     attendance_sheet_name = "presenca"
     grade_sheet_name = "notas"
@@ -415,41 +422,41 @@ if __name__ == "__main__":
 
         # quartiles = np.quantile(scores, [0, 0.25, 1]) # turma 1
         # quartiles = np.quantile(scores, [0, 0.37, 1]) # turma 2
-        # quartiles = np.quantile(scores, [0, 0.25, 0.5, 0.75, 1])
-        quartiles = np.quantile(scores, [0, 0.5, 1])
+        quartiles = np.quantile(scores, [0, 0.25, 0.5, 0.75, 1])
+        # quartiles = np.quantile(scores, [0, 0.5, 1])
 
-        safe_individual = []
-        relatively_safe_individual = []
-        relatively_danger_individual = []
-        danger_individual = []
-
-        for _, student in classroom.students.items():
-            if quartiles[0] <= student.general_score <= quartiles[1]:
-                danger += [(student, student.general_score)]
-                danger_individual += [(student, student.general_score)]
-            elif quartiles[1] < student.general_score <= quartiles[2]:
-                safe += [(student, student.general_score)]
-                safe_individual += [(student, student.general_score)]
+        negative_individual = []
+        relatively_negative_individual = []
+        relatively_positive_individual = []
+        positive_individual = []
 
         # for _, student in classroom.students.items():
-        #     if quartiles[3] <= student.general_score <= quartiles[4]:
-        #         safe += [(student, student.general_score)]
-        #         safe_individual += [(student, student.general_score)]
-        #     elif quartiles[2] <= student.general_score < quartiles[3]:
-        #         relatively_safe += [(student, student.general_score)]
-        #         relatively_safe_individual += [(student, student.general_score)]
-        #     elif quartiles[1] <= student.general_score < quartiles[2]:
-        #         relatively_danger += [(student, student.general_score)]
-        #         relatively_danger_individual += [(student, student.general_score)]
-        #     elif quartiles[0] <= student.general_score < quartiles[1]:
-        #         danger += [(student, student.general_score)]
-        #         danger_individual += [(student, student.general_score)]
+        #     if quartiles[0] <= student.general_score <= quartiles[1]:
+        #         positive += [(student, student.general_score)]
+        #         positive_individual += [(student, student.general_score)]
+        #     elif quartiles[1] < student.general_score <= quartiles[2]:
+        #         negative += [(student, student.general_score)]
+        #         negative_individual += [(student, student.general_score)]
+
+        for _, student in classroom.students.items():
+            if quartiles[3] <= student.general_score <= quartiles[4]:
+                negative += [(student, student.general_score)]
+                negative_individual += [(student, student.general_score)]
+            elif quartiles[2] <= student.general_score < quartiles[3]:
+                relatively_negative += [(student, student.general_score)]
+                relatively_negative_individual += [(student, student.general_score)]
+            elif quartiles[1] <= student.general_score < quartiles[2]:
+                relatively_positive += [(student, student.general_score)]
+                relatively_positive_individual += [(student, student.general_score)]
+            elif quartiles[0] <= student.general_score < quartiles[1]:
+                positive += [(student, student.general_score)]
+                positive_individual += [(student, student.general_score)]
 
         dropout_chart_individual = {
-            "safe": safe_individual,
-            "relatively_safe": relatively_safe_individual,
-            "relatively_danger": relatively_danger_individual,
-            "danger": danger_individual,
+            "negative": negative_individual,
+            "relatively_negative": relatively_negative_individual,
+            "relatively_positive": relatively_positive_individual,
+            "positive": positive_individual,
         }
 
         confusion_matrix = {
@@ -465,7 +472,7 @@ if __name__ == "__main__":
                 dropout_chart_individual[category], key=lambda x: x[1], reverse=True
             ):
                 # print(student[0].name, round(student[1], 2))
-                if "danger" in category:
+                if "positive" in category:
                     if str(student[0].name) in dropouts:
                         confusion_matrix["true_positive"] += 1
                     else:
@@ -490,10 +497,10 @@ if __name__ == "__main__":
         # )
 
     dropout_chart = {
-        "safe": safe,
-        "relatively_safe": relatively_safe,
-        "relatively_danger": relatively_danger,
-        "danger": danger,
+        "negative": negative,
+        "relatively_negative": relatively_negative,
+        "relatively_positive": relatively_positive,
+        "positive": positive,
     }
     # export attributes for implicit analysis
     # attributes are relative to the
@@ -502,6 +509,10 @@ if __name__ == "__main__":
         for student in dropout_chart[category]:
             # name
             results["name"] += [str(student[0].name)]
+            # results['classification'] += [category] # categorizes by the classificator
+            results["classification"] += [
+                "positive" if str(student[0].name) in dropouts else "negative"
+            ]  # categorizes by truth
             # grades
             total_n_grades = student[0].grades_below_5 + student[0].grades_above_5
             results["grades_average"] += [student[0].grades_sum / total_n_grades]
@@ -520,9 +531,9 @@ if __name__ == "__main__":
             results["grades_below_5"] += [
                 student[0].grades_below_5 / total_n_grades * 100
             ]
-            results["grades_above_5"] += [
-                student[0].grades_above_5 / total_n_grades * 100
-            ]
+            # results["grades_above_5"] += [
+            #     student[0].grades_above_5 / total_n_grades * 100
+            # ]
             results["grades_below_mean"] += [
                 student[0].grades_below_mean / total_n_grades * 100
             ]
@@ -538,30 +549,30 @@ if __name__ == "__main__":
             results["important_grades_below_mean"] += [
                 student[0].important_grades_below_mean / total_n_important * 100
             ]
-            results["important_grades_above_mean"] += [
-                student[0].important_grades_above_mean / total_n_important * 100
-            ]
-            results["important_activities_complete"] += [
-                student[0].important_activities_complete / total_n_important * 100
-            ]
+            # results["important_grades_above_mean"] += [
+            #     student[0].important_grades_above_mean / total_n_important * 100
+            # ]
+            # results["important_activities_complete"] += [
+            #     student[0].important_activities_complete / total_n_important * 100
+            # ]
             results["important_activities_incomplete"] += [
                 student[0].important_activities_incomplete / total_n_important * 100
             ]
-            results["important_activities_complete_above_average"] += [
-                student[0].important_activities_complete_above_average
-                / total_n_important
-                * 100
-            ]
+            # results["important_activities_complete_above_average"] += [
+            #     student[0].important_activities_complete_above_average
+            #     / total_n_important
+            #     * 100
+            # ]
             results["important_activities_complete_below_average"] += [
                 student[0].important_activities_complete_below_average
                 / total_n_important
                 * 100
             ]
-            results["important_activities_incomplete_above_average"] += [
-                student[0].important_activities_incomplete_above_average
-                / total_n_important
-                * 100
-            ]
+            # results["important_activities_incomplete_above_average"] += [
+            #     student[0].important_activities_incomplete_above_average
+            #     / total_n_important
+            #     * 100
+            # ]
             results["important_activities_incomplete_below_average"] += [
                 student[0].important_activities_incomplete_below_average
                 / total_n_important
@@ -572,23 +583,23 @@ if __name__ == "__main__":
                 student[0].activities_complete + student[0].activities_incomplete
             )
             total_n_activities = total_n_activities if total_n_activities > 0 else 1
-            results["activities_complete"] += [
-                student[0].activities_complete / total_n_activities * 100
-            ]
+            # results["activities_complete"] += [
+            #     student[0].activities_complete / total_n_activities * 100
+            # ]
             results["activities_incomplete"] += [
                 student[0].activities_incomplete / total_n_activities * 100
             ]
-            results["activities_complete_above_average"] += [
-                student[0].activities_complete_above_average / total_n_activities * 100
-            ]
+            # results["activities_complete_above_average"] += [
+            #     student[0].activities_complete_above_average / total_n_activities * 100
+            # ]
             results["activities_complete_below_average"] += [
                 student[0].activities_complete_below_average / total_n_activities * 100
             ]
-            results["activities_incomplete_above_average"] += [
-                student[0].activities_incomplete_above_average
-                / total_n_activities
-                * 100
-            ]
+            # results["activities_incomplete_above_average"] += [
+            #     student[0].activities_incomplete_above_average
+            #     / total_n_activities
+            #     * 100
+            # ]
             results["activities_incomplete_below_average"] += [
                 student[0].activities_incomplete_below_average
                 / total_n_activities
@@ -598,14 +609,14 @@ if __name__ == "__main__":
             total_n_attendance = (
                 student[0].attendance_above_mean + student[0].attendance_below_mean
             )
-            results["attendance_above_mean"] += [
-                student[0].attendance_above_mean / total_n_attendance * 100
-            ]
+            # results["attendance_above_mean"] += [
+            #     student[0].attendance_above_mean / total_n_attendance * 100
+            # ]
             results["attendance_below_mean"] += [
                 student[0].attendance_below_mean / total_n_attendance * 100
             ]
             results["missing"] += [student[0].missing / total_n_attendance * 100]
-            results["present"] += [student[0].present / total_n_attendance * 100]
+            # results["present"] += [student[0].present / total_n_attendance * 100]
             results["partial_presence"] += [
                 student[0].partial_presence / total_n_attendance * 100
             ]
@@ -618,11 +629,6 @@ if __name__ == "__main__":
                 if attrb_name not in results.keys():
                     results[attrb_name] = []
                 results[attrb_name] += [student[0].sequencial_missing[key]]
-
-            # results['classification'] += [category] # categorizes by the classificator
-            results["classification"] += [
-                "danger" if str(student[0].name) in dropouts else "safe"
-            ]  # categorizes by truth
 
     # get length of all keys in results
     # print them: key, length
@@ -639,4 +645,4 @@ if __name__ == "__main__":
     result_sheet = pd.DataFrame(results)
     # sort dataframe by name
     result_sheet = result_sheet.sort_values(by=["name"])
-    result_sheet.to_csv("result.csv", index=False)
+    result_sheet.to_csv("result-turma2.csv", index=False)
