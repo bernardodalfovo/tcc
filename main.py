@@ -645,4 +645,4 @@ if __name__ == "__main__":
     result_sheet = pd.DataFrame(results)
     # sort dataframe by name
     result_sheet = result_sheet.sort_values(by=["name"])
-    result_sheet.to_csv("result-turma2.csv", index=False)
+    result_sheet.to_csv("result.csv", index=False)
