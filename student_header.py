@@ -186,14 +186,6 @@ class Student:
                     else:
                         self.activities_incomplete_below_average += 1
 
-            if (
-                self.grade_report[activity]["grade"]
-                < self.grade_report[activity]["mean_grade"]
-            ):
-                self.grades_below_mean += 1
-            else:
-                self.grades_above_mean += 1
-
             max_score += activity_weight
             activity_anti_score += (
                 (activity_weight * self.grade_report[activity]["completion_rate"])
