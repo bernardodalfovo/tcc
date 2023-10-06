@@ -10,11 +10,13 @@ from unidecode import unidecode
 
 from classroom_header import Classroom
 from student_header import Student
+from utils import train_test_split
 
 ratio_evaluation = 1.0
 
 results = {
     "name": [],
+    "classification": [],
     "grades_average": [],
     "grades_between_0_2_5": [],
     "grades_between_2_5_5": [],
@@ -44,7 +46,6 @@ results = {
     # "present": [],
     "partial_presence": [],
     "amount_sequencial_missing": [],
-    "classification": [],
 }
 
 
@@ -645,4 +646,10 @@ if __name__ == "__main__":
     result_sheet = pd.DataFrame(results)
     # sort dataframe by name
     result_sheet = result_sheet.sort_values(by=["name"])
+    # divide into train and test
+    train, test = train_test_split(df=result_sheet, test_size=0.2, dropouts=dropouts)
+    # export to csv
+    train.to_csv("train.csv", index=False)
+    test.to_csv("test.csv", index=False)
+    # export to csv
     result_sheet.to_csv("result.csv", index=False)
