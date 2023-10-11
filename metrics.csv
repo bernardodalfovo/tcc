@@ -287,3 +287,39 @@ Turma 1,Random 20 80,Info gain Top 5,SVM,0.39286,0.73333,0.76667,0.51163
 Turma 1,Random 20 80,Info gain Top 5,Gradient Boosting,0.67857,0.95,0.88889,0.79167
 Turma 1,Random 20 80,Info gain Top 5,AdaBoost,0.64286,0.85714,0.85556,0.73469
 Turma 1,Random 20 80,Info gain Top 5,Logistic Regression,0.5,0.875,0.82222,0.63636
+Turma 2,10 Fold,None,Neural Network,0.9375,0.9375,0.95349,0.9375
+Turma 2,10 Fold,None,Random Forest,0.9375,0.96774,0.96512,0.95238
+Turma 2,10 Fold,None,Tree,0.9375,0.96774,0.96512,0.95238
+Turma 2,10 Fold,None,kNN,0.96875,0.93939,0.96512,0.95385
+Turma 2,10 Fold,None,Naive Bayes,1.0,0.91429,0.96512,0.95522
+Turma 2,10 Fold,None,SVM,0.96875,0.93939,0.96512,0.95385
+Turma 2,10 Fold,None,Gradient Boosting,0.9375,0.9375,0.95349,0.9375
+Turma 2,10 Fold,None,AdaBoost,0.90625,0.96667,0.95349,0.93548
+Turma 2,10 Fold,None,Logistic Regression,0.9375,0.9375,0.95349,0.9375
+Turma 2,Random 20 80,None,Neural Network,0.95833,0.95833,0.96667,0.95833
+Turma 2,Random 20 80,None,Random Forest,0.93056,0.98529,0.96667,0.95714
+Turma 2,Random 20 80,None,Tree,0.94444,0.98551,0.97222,0.96454
+Turma 2,Random 20 80,None,kNN,0.94444,0.98551,0.97222,0.96454
+Turma 2,Random 20 80,None,Naive Bayes,0.97222,0.89744,0.94444,0.93333
+Turma 2,Random 20 80,None,SVM,0.95833,0.94521,0.96111,0.95172
+Turma 2,Random 20 80,None,Gradient Boosting,0.91667,0.98507,0.96111,0.94964
+Turma 2,Random 20 80,None,AdaBoost,0.88889,0.95522,0.93889,0.92086
+Turma 2,Random 20 80,None,Logistic Regression,0.91667,0.97059,0.95556,0.94286
+Turma 1,Random 20 80,None,Neural Network,0.64286,0.81818,0.84444,0.72
+Turma 1,Random 20 80,None,Random Forest,0.67857,0.82609,0.85556,0.7451
+Turma 1,Random 20 80,None,Tree,0.64286,0.78261,0.83333,0.70588
+Turma 1,Random 20 80,None,kNN,0.64286,0.9,0.86667,0.75
+Turma 1,Random 20 80,None,Naive Bayes,0.92857,0.63415,0.81111,0.75362
+Turma 1,Random 20 80,None,SVM,0.39286,0.64706,0.74444,0.48889
+Turma 1,Random 20 80,None,Gradient Boosting,0.60714,0.85,0.84444,0.70833
+Turma 1,Random 20 80,None,AdaBoost,0.75,0.80769,0.86667,0.77778
+Turma 1,Random 20 80,None,Logistic Regression,0.64286,0.81818,0.84444,0.72
+Turma 1,10 Fold,None,Neural Network,0.6,0.66667,0.82927,0.63158
+Turma 1,10 Fold,None,Random Forest,0.7,0.7,0.85366,0.7
+Turma 1,10 Fold,None,Tree,0.6,0.54545,0.78049,0.57143
+Turma 1,10 Fold,None,kNN,0.6,0.75,0.85366,0.66667
+Turma 1,10 Fold,None,Naive Bayes,0.9,0.5,0.7561,0.64286
+Turma 1,10 Fold,None,SVM,0.6,0.66667,0.82927,0.63158
+Turma 1,10 Fold,None,Gradient Boosting,0.7,0.63636,0.82927,0.66667
+Turma 1,10 Fold,None,AdaBoost,0.8,0.66667,0.85366,0.72727
+Turma 1,10 Fold,None,Logistic Regression,0.7,0.7,0.85366,0.7
