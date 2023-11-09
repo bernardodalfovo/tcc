@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def train_test_split(df: pd.DataFrame, test_size: float, dropouts: list):
+def train_test_split(df: pd.DataFrame, test_size: float):
     """Split dataframe into train and test sets.
 
     Check which students are dropouts with the argument 'dropouts'.
@@ -9,24 +9,19 @@ def train_test_split(df: pd.DataFrame, test_size: float, dropouts: list):
 
     :param df: pandas DataFrame with student's data. first column must be its name,
         and second column must be its classification
-        ('positive' = dropout, 'negative' = non-dropout)
+        ('positive' = dropout, 'negative' = non-dropout). The first three rows must
+        follow Orange's format of header.
     :param test_size: proportion of data to be used as test set
-    :param dropouts: list of students' names that are dropouts
     """
-    # Split data into train and test sets
-    test = df.sample(frac=test_size, random_state=0)
-    train = df.drop(test.index)
+    train, test = df.iloc[:2, :], df.iloc[:2, :]
 
-    # Check which students are dropouts
-    test_dropouts = test[test.iloc[:, 1] == "positive"]
-    train_dropouts = train[train.iloc[:, 1] == "positive"]
+    # get all rows with dropouts
+    rows = df[df.iloc[:, 1] == "positive"]
 
-    # Keep the same proportion of dropouts in both sets
-    test = test.drop(test_dropouts.index)
-    train = train.drop(train_dropouts.index)
+    test = pd.concat([test, rows[: int(rows.shape[0] * test_size)]])
+    train = pd.concat([train, rows[int(rows.shape[0] * test_size) :]])
 
-    # Add dropouts to the sets
-    test = pd.concat([test, test_dropouts], ignore_index=True)
-    train = pd.concat([train, train_dropouts], ignore_index=True)
-
+    non_dropouts = df[df.iloc[:, 1] == "negative"]
+    test = pd.concat([test, non_dropouts[: int(non_dropouts.shape[0] * test_size)]])
+    train = pd.concat([train, non_dropouts[int(non_dropouts.shape[0] * test_size) :]])
     return train, test
