@@ -1,9 +1,0 @@
-Resultados para a planilha de notas SEM notas de peso zero (100% dos dados):    {'true_positive': 32, 'true_negative': 43, 'false_positive': 11, 'false_negative': 0}
-Resultados para a planilha de notas SEM notas de peso zero (75% dos dados):     {'true_positive': 32, 'true_negative': 43, 'false_positive': 11, 'false_negative': 0}
-Resultados para a planilha de notas SEM notas de peso zero (50% dos dados):     {'true_positive': 32, 'true_negative': 43, 'false_positive': 11, 'false_negative': 0}
-Resultados para a planilha de notas SEM notas de peso zero (25% dos dados):     {'true_positive': 31, 'true_negative': 42, 'false_positive': 12, 'false_negative': 1}
-
-Resultados para a planilha de notas COM notas de peso zero (100% dos dados):    {'true_positive': 31, 'true_negative': 42, 'false_positive': 12, 'false_negative': 1}
-Resultados para a planilha de notas COM notas de peso zero (75% dos dados):     {'true_positive': 31, 'true_negative': 42, 'false_positive': 12, 'false_negative': 1}
-Resultados para a planilha de notas COM notas de peso zero (50% dos dados):     {'true_positive': 32, 'true_negative': 43, 'false_positive': 11, 'false_negative': 0}
-Resultados para a planilha de notas COM notas de peso zero (25% dos dados):     {'true_positive': 24, 'true_negative': 39, 'false_positive': 15, 'false_negative': 8}
