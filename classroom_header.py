@@ -108,6 +108,8 @@ class Classroom:  # noqa
                         "valid": valid,
                     }
                 elif report == "?":
+                    # if whole class has ? -> consider it as invalid
+                    # like whole class got presence
                     score = max_max_score
                     class_score += [float(score)]
                     overall_score += [float(score)]
