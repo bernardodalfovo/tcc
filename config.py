@@ -1,7 +1,9 @@
+interpolate_attendance = False
+
 ratio_evaluation = [1.0, 0.75, 0.5, 0.25]
 analysis_repeat = 10
 relative_class = False
-test_size = 0.2
+houldout_test_size = 1 / 3
 
 n_best_features = [5, 10]
 
@@ -10,7 +12,6 @@ grade_sheet_name = "notas"
 activity_sheet_name = "importantes"
 
 sheets = {
-    # "1WbqYKXmMg4vkyROidhdEsTEaZLPLkySbbTJqSZKTuKQ", # fake, grades, attendence and important activities
     "turma_1": "1Ol0xuLtDwJw4CndlL__dwKI0cDY3aCvA-ELrBotKn3E",
     "turma_2": "1SAY_0d6xP_SffE5kvjmzYPPDRjAm1iLjmXsZ1n6Uzvo",
 }

@@ -79,7 +79,11 @@ class Student:
             self.sequencial_missing[i] = 0
 
     def compute_general_score(
-        self, grade_weight: float, activity_weight: float, attendance_weight: float
+        self,
+        grade_weight: float,
+        activity_weight: float,
+        attendance_weight: float,
+        interpolate_attendance: bool = False,
     ):
         """Calcula a pontuacao geral do aluno no ranking.
 
@@ -95,7 +99,7 @@ class Student:
             else self.activity_score
         )
         self.attendance_score = (
-            self.compute_attendance_score()
+            self.compute_attendance_score(interpolate=interpolate_attendance)
             if self.attendance_score is None
             else self.attendance_score
         )
@@ -171,7 +175,22 @@ class Student:
                     self.grade_report[activity]["important"] = True
                     break
 
-    def compute_attendance_score(self):
+    def interpolate_progression(self):
+        """Interpola pontuacao para dias invalidos."""
+        x = []
+        y = []
+        for index, datapoint in enumerate(self.progression):
+            if datapoint is not None:
+                x += [index]
+                y += [datapoint]
+        f = interp1d(x, y)
+
+        xnew = [i for i in range(len(self.attendance_report))]
+        ynew = f(xnew)
+
+        return ynew
+
+    def compute_attendance_score(self, interpolate: bool):
         """Compute student's attendance score."""
         report = self.attendance_report
         self.missing_rate = []
@@ -192,11 +211,36 @@ class Student:
                 self.progression += [report[date]["score"]]
                 max_valid_score += [report[date]["max_score"]]
                 date_weights += [report[date]["mean_score"] / report[date]["max_score"]]
+            elif index + 1 == len(report) and interpolate:
+                # get last valid datapoint if very last datapoint is not valid
+                # so that interpolation goes until last datapoint
+                for i, data in enumerate(self.progression[::-1]):
+                    if data is not None:
+                        self.progression += [data]
+                        date_weights += [
+                            self.overall_mean_attendance_score
+                            / report[date]["max_score"]
+                        ]
+                        break
             else:
                 self.progression += [None]
                 date_weights += [
                     self.overall_mean_attendance_score / report[date]["max_score"]
                 ]
+
+        if self.progression[0] is None and interpolate:
+            # get mean score if very first datapoint is not valid
+            # so that interpolation goes from the first datapoint
+            self.progression[0] = np.mean(
+                [i for i in self.progression if i is not None]
+            )
+            date_weights[0] = (
+                self.overall_mean_attendance_score / report[date]["max_score"]
+            )
+
+        if interpolate:
+            self.progression = self.interpolate_progression()
+
         weighted_anti_progression = []
         for index, data in enumerate(self.progression):
             if data is not None:
