@@ -47,10 +47,13 @@ feature_selection_methods = {
 
 evaluation_methods = {
     "xvalidation (k=10)": CrossValidation(k=10, random_state=0, stratified=False),
-    "random (n=10, test=20%)": ShuffleSplit(
-        n_resamples=10, test_size=0.2, random_state=None, stratified=False
+    f"random (n=10, test={int(config.houldout_test_size*100)}%)": ShuffleSplit(
+        n_resamples=10,
+        test_size=config.houldout_test_size,
+        random_state=None,
+        stratified=False,
     ),
-    f"test_train ({int(config.test_size*100)}/{abs(100 - int(config.test_size*100))})": TestOnTestData(),
+    f"holdout ({int(config.houldout_test_size*100)}/{abs(100 - int(config.houldout_test_size*100))})": TestOnTestData(),
 }
 
 
@@ -80,7 +83,7 @@ def implicit_analysis(
         df=attributes,
         dataset=classroom.class_name,
         ratio=evaluation_ratio,
-        test_split=config.test_size,
+        test_split=config.houldout_test_size,
         path="./.temp",
     )
     res_dict = run(
@@ -127,8 +130,10 @@ def run(
                 feature_selection = SelectBestFeatures(
                     method=feature_selection_method, k=n
                 )
+                feature_selected_data = feature_selection(full_data)
             else:
                 feature_selection = None
+                feature_selected_data = None
 
             feature_selection_ = (
                 f"{feature_selection_name} ({n})"
@@ -162,8 +167,8 @@ def run(
                             "FN": 0,
                         }
                     # print(dataset, ratio_evaluation, feature_selection_name, n, evaluation_method_name, learner_name)
-                    if "test_train" in evaluation_method_name:
-                        if config.test_size > 0.0:
+                    if "holdout" in evaluation_method_name:
+                        if config.houldout_test_size > 0.0:
                             evaluation_result = evaluation_method(
                                 data=train_data, test_data=test_data, learners=[learner]
                             )
@@ -171,7 +176,7 @@ def run(
                             continue
                     else:
                         evaluation_result = evaluation_method(
-                            data=feature_selection(full_data)
+                            data=feature_selected_data
                             if feature_selection is not None
                             else full_data,
                             learners=[learner],
@@ -223,7 +228,7 @@ def run(
                     if feature_selection is not None:
                         top_features = feature_selection(
                             full_data
-                            if "test_train" not in evaluation_method_name
+                            if "holdout" not in evaluation_method_name
                             else train_data
                         ).domain.attributes
                         for i in range(max(config.n_best_features)):
