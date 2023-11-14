@@ -96,6 +96,53 @@ def regular_implicit_analysis(
     )
 
 
+def three_class_explicit_analysis(
+    classroom: Classroom, sheet_name: str, evaluation_ratio: float
+):  # noqa
+    confusion_matrix = {
+        "true_dropout": 0,
+        "false_dropout_partial": 0,
+        "false_dropout_safe": 0,
+        "true_partial": 0,
+        "false_partial_dropout": 0,
+        "false_partial_safe": 0,
+        "false_safe_dropout": 0,
+        "false_safe_partial": 0,
+        "true_safe": 0,
+    }
+    # execute explicit analysis with regular weights (1/3 for each)
+    confusion_matrix = analise_explicita.repeat_run(
+        repeat=config.analysis_repeat,
+        evaluation_ratio=evaluation_ratio,
+        classroom=classroom,
+        grade_w=0.3,
+        act_w=0.3,
+        att_w=0.4,
+        confusion_matrix=confusion_matrix,
+    )
+    metrics_df = pd.DataFrame.from_dict(
+        {
+            "sheet_name": [sheet_name],
+            "ratio": [evaluation_ratio],
+            "TD": [confusion_matrix["true_dropout"]],
+            "FDP": [confusion_matrix["false_dropout_partial"]],
+            "FDS": [confusion_matrix["false_dropout_safe"]],
+            "FPD": [confusion_matrix["false_partial_dropout"]],
+            "TP": [confusion_matrix["true_partial"]],
+            "FPS": [confusion_matrix["false_partial_safe"]],
+            "FSD": [confusion_matrix["false_safe_dropout"]],
+            "FSP": [confusion_matrix["false_safe_partial"]],
+            "TS": [confusion_matrix["true_safe"]],
+        }
+    )
+    metrics_df.to_csv(
+        "3_class_explicit_metrics.csv",
+        mode="a",
+        header=not os.path.exists("3_class_explicit_metrics.csv"),
+        index=False,
+    )
+
+
 def regular_explicit_analysis(
     classroom: Classroom, sheet_name: str, evaluation_ratio: float
 ):  # noqa
@@ -104,9 +151,9 @@ def regular_explicit_analysis(
         repeat=config.analysis_repeat,
         evaluation_ratio=evaluation_ratio,
         classroom=classroom,
-        grade_w=1 / 3,
-        act_w=1 / 3,
-        att_w=1 / 3,
+        grade_w=0.3,
+        act_w=0.3,
+        att_w=0.4,
     )
     recall = metrics.recall(confusion_matrix=confusion_matrix)
     precision = metrics.precision(confusion_matrix=confusion_matrix)
@@ -237,19 +284,24 @@ if __name__ == "__main__":
         )
 
         for evaluation_ratio in config.ratio_evaluation:
-            # brute_force_explicit_weights(classroom=classroom, sheet_name=sheet_name, evaluation_ratio=evaluation_ratio)
             print(f"Running: {classroom.class_name} at {evaluation_ratio*100}%")
-            print("Explicit analysis...")
+            # print("Explicit analysis...")
+            # brute_force_explicit_weights(classroom=classroom, sheet_name=sheet_name, evaluation_ratio=evaluation_ratio)
+            # three_class_explicit_analysis(
+            #     classroom=classroom,
+            #     sheet_name=sheet_name,
+            #     evaluation_ratio=evaluation_ratio,
+            # )
             regular_explicit_analysis(
                 classroom=classroom,
                 sheet_name=sheet_name,
                 evaluation_ratio=evaluation_ratio,
             )
-            print("Explicit analysis... done")
-            print("Implicit analysis...")
-            regular_implicit_analysis(
-                classroom=classroom,
-                sheet_name=sheet_name,
-                evaluation_ratio=evaluation_ratio,
-            )
-            print("Implicit analysis... done")
+            # print("Explicit analysis... done")
+            # print("Implicit analysis...")
+            # regular_implicit_analysis(
+            #     classroom=classroom,
+            #     sheet_name=sheet_name,
+            #     evaluation_ratio=evaluation_ratio,
+            # )
+            # print("Implicit analysis... done")
