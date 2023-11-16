@@ -266,17 +266,20 @@ def attribute_extraction(classroom: Classroom) -> dict:  # noqa
         "grades_between_7_5_10": ["c", ""],
         "grades_below_5": ["c", ""],
         "grades_below_mean": ["c", ""],
-        "important_activities_complete_below_average": ["c", ""],
-        "important_activities_incomplete": ["c", ""],
-        "important_activities_incomplete_below_average": ["c", ""],
         "important_grades_below_mean": ["c", ""],
-        "activities_complete_below_average": ["c", ""],
+        "important_activities_complete_majority": ["c", ""],
+        "important_activities_complete_minority": ["c", ""],
+        "important_activities_incomplete": ["c", ""],
+        "important_activities_incomplete_majority": ["c", ""],
+        "important_activities_incomplete_minority": ["c", ""],
+        "activities_complete_majority": ["c", ""],
+        "activities_complete_minority": ["c", ""],
         "activities_incomplete": ["c", ""],
-        "activities_incomplete_below_average": ["c", ""],
+        "activities_incomplete_majority": ["c", ""],
+        "activities_incomplete_minority": ["c", ""],
         "attendance_below_mean": ["c", ""],
         "missing": ["c", ""],
         "partial_presence": ["c", ""],
-        "amount_sequencial_missing": ["c", ""],
     }
 
     # add sequencial missing attributes
@@ -327,15 +330,17 @@ def attribute_extraction(classroom: Classroom) -> dict:  # noqa
         results["important_activities_incomplete"] += [
             student.important_activities_incomplete / total_n_important * 100
         ]
-        results["important_activities_complete_below_average"] += [
-            student.important_activities_complete_below_average
-            / total_n_important
-            * 100
+        results["important_activities_complete_majority"] += [
+            student.important_activities_complete_majority / total_n_important * 100
         ]
-        results["important_activities_incomplete_below_average"] += [
-            student.important_activities_incomplete_below_average
-            / total_n_important
-            * 100
+        results["important_activities_incomplete_majority"] += [
+            student.important_activities_incomplete_majority / total_n_important * 100
+        ]
+        results["important_activities_complete_minority"] += [
+            student.important_activities_complete_minority / total_n_important * 100
+        ]
+        results["important_activities_incomplete_minority"] += [
+            student.important_activities_incomplete_minority / total_n_important * 100
         ]
         # regular activities
         total_n_activities = student.activities_complete + student.activities_incomplete
@@ -343,11 +348,17 @@ def attribute_extraction(classroom: Classroom) -> dict:  # noqa
         results["activities_incomplete"] += [
             student.activities_incomplete / total_n_activities * 100
         ]
-        results["activities_complete_below_average"] += [
-            student.activities_complete_below_average / total_n_activities * 100
+        results["activities_complete_majority"] += [
+            student.activities_complete_majority / total_n_activities * 100
         ]
-        results["activities_incomplete_below_average"] += [
-            student.activities_incomplete_below_average / total_n_activities * 100
+        results["activities_incomplete_majority"] += [
+            student.activities_incomplete_majority / total_n_activities * 100
+        ]
+        results["activities_complete_minority"] += [
+            student.activities_complete_minority / total_n_activities * 100
+        ]
+        results["activities_incomplete_minority"] += [
+            student.activities_incomplete_minority / total_n_activities * 100
         ]
         # attendance
         total_n_attendance = (
@@ -360,7 +371,6 @@ def attribute_extraction(classroom: Classroom) -> dict:  # noqa
         results["partial_presence"] += [
             student.partial_presence / total_n_attendance * 100
         ]
-        results["amount_sequencial_missing"] += [student.amount_sequencial_missing]
         for key in student.sequencial_missing.keys():
             attrb_name = f"sequencial_missing_{key}"
             results[attrb_name] += [student.sequencial_missing[key]]

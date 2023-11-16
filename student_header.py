@@ -14,7 +14,7 @@ class Student:
         self.progression = []
         self.weighted_progression = []
 
-        self.missing_rate = []
+        # self.missing_rate = []
         self.mean_scores = []
         self.max_score = []
 
@@ -37,20 +37,20 @@ class Student:
         self.activity_report = {}
         self.activity_score = None
         self.important_activities_complete = 0
-        self.important_activities_complete_above_average = 0
-        self.important_activities_complete_below_average = 0
+        self.important_activities_complete_majority = 0
+        self.important_activities_complete_minority = 0
         self.important_activities_incomplete = 0
-        self.important_activities_incomplete_above_average = 0
-        self.important_activities_incomplete_below_average = 0
+        self.important_activities_incomplete_majority = 0
+        self.important_activities_incomplete_minority = 0
         self.important_grades_below_mean = 0
         self.important_grades_above_mean = 0
 
         self.activities_complete = 0
-        self.activities_complete_above_average = 0
-        self.activities_complete_below_average = 0
+        self.activities_complete_majority = 0
+        self.activities_complete_minority = 0
         self.activities_incomplete = 0
-        self.activities_incomplete_above_average = 0
-        self.activities_incomplete_below_average = 0
+        self.activities_incomplete_majority = 0
+        self.activities_incomplete_minority = 0
 
         self.attendance_report = {}
         self.attendance_score = None
@@ -60,19 +60,19 @@ class Student:
         self.present = 0
         self.partial_presence = 0
         self.amount_sequencial_missing = 0
-        self.missing_percentage = {
-            0.0: 0,
-            10.0: 0,
-            20.0: 0,
-            30.0: 0,
-            40.0: 0,
-            50.0: 0,
-            60.0: 0,
-            70.0: 0,
-            80.0: 0,
-            90.0: 0,
-            100.0: 0,
-        }
+        # self.missing_percentage = {
+        #     0.0: 0,
+        #     10.0: 0,
+        #     20.0: 0,
+        #     30.0: 0,
+        #     40.0: 0,
+        #     50.0: 0,
+        #     60.0: 0,
+        #     70.0: 0,
+        #     80.0: 0,
+        #     90.0: 0,
+        #     100.0: 0,
+        # }
 
         self.sequencial_missing = {}
         for i in range(0, 501):
@@ -193,7 +193,7 @@ class Student:
     def compute_attendance_score(self, interpolate: bool):
         """Compute student's attendance score."""
         report = self.attendance_report
-        self.missing_rate = []
+        # self.missing_rate = []
         self.mean_scores = []
         self.max_score = []
         max_valid_score = []
@@ -202,7 +202,7 @@ class Student:
         for index, date in enumerate(report.keys()):
             # TODO: no need to compute these attributes here, can be done from classroom
             # TODO: access attributes directly from parent class
-            self.missing_rate += [report[date]["missing_rate"]]
+            # self.missing_rate += [report[date]["missing_rate"]]
             self.mean_scores += [report[date]["mean_score"]]
             self.max_score += [report[date]["max_score"]]
             # do not compute days in which everyone was present
@@ -271,13 +271,13 @@ class Student:
 
     def compute_attributes(self):  # noqa
         # TODO: remove redundant attributes (not used in implicit analysis)
-        self.missing_rate = []
+        # self.missing_rate = []
         self.mean_scores = []
         self.max_score = []
         for index, date in enumerate(self.attendance_report.keys()):
             # TODO: no need to compute these attributes here, can be done from classroom
             # TODO: access attributes directly from parent class
-            self.missing_rate += [self.attendance_report[date]["missing_rate"]]
+            # self.missing_rate += [self.attendance_report[date]["missing_rate"]]
             self.mean_scores += [self.attendance_report[date]["mean_score"]]
             self.max_score += [self.attendance_report[date]["max_score"]]
         missing_sequencial_count = 0
@@ -296,16 +296,16 @@ class Student:
             if score == 0.0:
                 missing_sequencial_count += 1
                 self.missing += 1
-                if self.missing_rate[index] not in self.missing_percentage.keys():
-                    self.missing_percentage[self.missing_rate[index]] = 0
-                self.missing_percentage[self.missing_rate[index]] += 1
+                # if self.missing_rate[index] not in self.missing_percentage.keys():
+                #     self.missing_percentage[self.missing_rate[index]] = 0
+                # self.missing_percentage[self.missing_rate[index]] += 1
             else:
-                if missing_sequencial_count > 0:
+                if missing_sequencial_count > 1:
                     if missing_sequencial_count not in self.sequencial_missing.keys():
                         self.sequencial_missing[missing_sequencial_count] = 0
                     self.sequencial_missing[missing_sequencial_count] += 1
-                    if missing_sequencial_count >= 3:
-                        self.amount_sequencial_missing += 1
+                    # if missing_sequencial_count >= 3:
+                    #     self.amount_sequencial_missing += 1
                 missing_sequencial_count = 0
                 if score == self.max_score[index]:
                     self.present += 1
@@ -314,35 +314,35 @@ class Student:
 
         self._compute_important_activities()
         for activity in self.grade_report.keys():
+            self.grades_sum += self.grade_report[activity]["grade"]
             completed = self.grade_report[activity]["completed"]
             is_important = self.grade_report[activity]["important"]
-
             if completed:
                 if is_important:
                     self.important_activities_complete += 1
                     if self.grade_report[activity]["completion_rate"] >= 0.5:
-                        self.important_activities_complete_above_average += 1
+                        self.important_activities_complete_majority += 1
                     else:
-                        self.important_activities_complete_below_average += 1
+                        self.important_activities_complete_minority += 1
                 else:
                     self.activities_complete += 1
                     if self.grade_report[activity]["completion_rate"] >= 0.5:
-                        self.activities_complete_above_average += 1
+                        self.activities_complete_majority += 1
                     else:
-                        self.activities_complete_below_average += 1
+                        self.activities_complete_minority += 1
             else:
                 if is_important:
                     self.important_activities_incomplete += 1
                     if self.grade_report[activity]["completion_rate"] >= 0.5:
-                        self.important_activities_incomplete_above_average += 1
+                        self.important_activities_incomplete_majority += 1
                     else:
-                        self.important_activities_incomplete_below_average += 1
+                        self.important_activities_incomplete_minority += 1
                 else:
                     self.activities_incomplete += 1
                     if self.grade_report[activity]["completion_rate"] >= 0.5:
-                        self.activities_incomplete_above_average += 1
+                        self.activities_incomplete_majority += 1
                     else:
-                        self.activities_incomplete_below_average += 1
+                        self.activities_incomplete_minority += 1
 
             if 0 <= self.grade_report[activity]["grade"] <= 2.5:
                 self.grades_between_0_2_5 += 1
@@ -377,40 +377,40 @@ class Student:
         self.grades_sum = 0
 
         self.important_activities_complete = 0
-        self.important_activities_complete_above_average = 0
-        self.important_activities_complete_below_average = 0
+        self.important_activities_complete_majority = 0
+        self.important_activities_complete_minority = 0
         self.important_activities_incomplete = 0
-        self.important_activities_incomplete_above_average = 0
-        self.important_activities_incomplete_below_average = 0
+        self.important_activities_incomplete_majority = 0
+        self.important_activities_incomplete_minority = 0
         self.important_grades_below_mean = 0
         self.important_grades_above_mean = 0
 
         self.activities_complete = 0
-        self.activities_complete_above_average = 0
-        self.activities_complete_below_average = 0
+        self.activities_complete_majority = 0
+        self.activities_complete_minority = 0
         self.activities_incomplete = 0
-        self.activities_incomplete_above_average = 0
-        self.activities_incomplete_below_average = 0
+        self.activities_incomplete_majority = 0
+        self.activities_incomplete_minority = 0
 
         self.attendance_above_mean = 0
         self.attendance_below_mean = 0
         self.missing = 0
         self.present = 0
         self.partial_presence = 0
-        self.amount_sequencial_missing = 0
-        self.missing_percentage = {
-            0.0: 0,
-            10.0: 0,
-            20.0: 0,
-            30.0: 0,
-            40.0: 0,
-            50.0: 0,
-            60.0: 0,
-            70.0: 0,
-            80.0: 0,
-            90.0: 0,
-            100.0: 0,
-        }
+        # self.amount_sequencial_missing = 0
+        # self.missing_percentage = {
+        #     0.0: 0,
+        #     10.0: 0,
+        #     20.0: 0,
+        #     30.0: 0,
+        #     40.0: 0,
+        #     50.0: 0,
+        #     60.0: 0,
+        #     70.0: 0,
+        #     80.0: 0,
+        #     90.0: 0,
+        #     100.0: 0,
+        # }
 
         self.sequencial_missing = {}
         for i in range(0, 501):
