@@ -261,6 +261,11 @@ def brute_force_explicit_weights(
 
 
 if __name__ == "__main__":
+    # remove existing csv files
+    if os.path.exists("implicit_metrics.csv"):
+        os.remove("implicit_metrics.csv")
+    if os.path.exists("explicit_metrics.csv"):
+        os.remove("explicit_metrics.csv")
     for sheet_name, sheet_id in config.sheets.items():
         # TODO: move this to utils
         attendance_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={config.attendance_sheet_name}"
@@ -304,4 +309,11 @@ if __name__ == "__main__":
             #     sheet_name=sheet_name,
             #     evaluation_ratio=evaluation_ratio,
             # )
+            # print("Explicit analysis... done")
+            # print("Implicit analysis...")
+            regular_implicit_analysis(
+                classroom=classroom,
+                sheet_name=sheet_name,
+                evaluation_ratio=evaluation_ratio,
+            )
             # print("Implicit analysis... done")
