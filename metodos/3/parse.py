@@ -270,6 +270,8 @@ for _, student in classroom._students.items():
             else classroom.interpolate_weights[index]
         ):
             drop_out_count += 1
+        else:
+            drop_out_count = 0
         if drop_out_count == classify_dropout_number:
             student.drop_out = True
             break
